@@ -270,10 +270,17 @@ export default function Styleguide() {
                   <div className="space-y-4">
                     <h4 className="font-semibold">Standard Variants</h4>
                     <div className="flex flex-wrap gap-4">
-                      <div className="space-y-2">
-                        <Button>Default</Button>
-                        <code className="block text-xs">variant="default"</code>
-                      </div>
+                    <div className="space-y-2">
+                      <Button>
+                        <div className="w-4 h-4 rounded border-2 border-current flex items-center justify-center">
+                          <div className="w-2 h-0.5 bg-current" />
+                          <div className="w-0.5 h-2 bg-current absolute" />
+                        </div>
+                        New
+                      </Button>
+                      <code className="block text-xs">variant="default"</code>
+                      <p className="text-xs text-muted-foreground text-center">Primary purple gradient (like uploaded image)</p>
+                    </div>
                       <div className="space-y-2">
                         <Button variant="secondary">Secondary</Button>
                         <code className="block text-xs">variant="secondary"</code>
