@@ -220,14 +220,15 @@ export default function Styleguide() {
                       <div className="flex flex-wrap gap-4">
                         <div className="space-y-2">
                           <Button>
-                            <div className="w-4 h-4 rounded border-2 border-current flex items-center justify-center">
+                            <div className="w-4 h-4 rounded border border-purple-400 flex items-center justify-center text-purple-400">
                               <div className="w-2 h-0.5 bg-current" />
                               <div className="w-0.5 h-2 bg-current absolute" />
                             </div>
+                            <div className="w-px h-4 bg-purple-300 mx-1"></div>
                             Default
                           </Button>
                           <code className="block text-xs text-center">variant="default"</code>
-                          <p className="text-xs text-muted-foreground text-center">Primary purple gradient</p>
+                          <p className="text-xs text-muted-foreground text-center">Muted purple with divider</p>
                         </div>
                         <div className="space-y-2">
                           <Button variant="ghost">Ghost</Button>

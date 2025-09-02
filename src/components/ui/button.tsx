@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 text-white hover:from-purple-500 hover:via-purple-400 hover:to-blue-500 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full",
+        default: "bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200 hover:border-purple-300 transition-all duration-300 rounded-md",
         ghost: "hover:bg-accent hover:text-accent-foreground",
       },
       size: {
