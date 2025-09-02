@@ -17,18 +17,18 @@ export const Hero = () => {
       <div className="relative z-10 container mx-auto px-6 text-center">
         <div className="max-w-4xl mx-auto animate-fade-in">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
-            Build Something Amazing
+            Rename Your Photos Intelligently
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-muted-foreground max-w-2xl mx-auto">
-            Start your next project with this beautiful, modern template. 
-            Clean design system, responsive layout, and ready to customize.
+            Transform messy photo filenames into organized, descriptive names using AI. 
+            Sort thousands of photos in minutes, not hours.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
             <Button variant="hero" size="lg" className="text-lg px-8 py-6">
-              Get Started
+              Start Renaming
             </Button>
             <Button variant="outline" size="lg" className="text-lg px-8 py-6">
-              Learn More
+              See Demo
             </Button>
           </div>
         </div>
