@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ImageIcon, Menu } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Navbar = () => {
   return (
@@ -29,7 +30,9 @@ export const Navbar = () => {
           
           {/* CTA Button */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost">Sign In</Button>
+            <Button variant="ghost" asChild>
+              <Link to="/login">Sign In</Link>
+            </Button>
             <Button variant="default">Try Free</Button>
           </div>
           
