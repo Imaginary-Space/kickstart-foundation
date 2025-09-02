@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
+import { P5Background } from "@/components/P5Background";
 import heroImage from "@/assets/hero-image.jpg";
 
 export const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-subtle">
+      {/* P5.js Interactive Background */}
+      <P5Background />
+      
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
