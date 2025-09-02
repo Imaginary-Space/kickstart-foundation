@@ -18,7 +18,10 @@ import {
   Moon,
   Sun,
   Copy,
-  Check
+  Check,
+  Camera,
+  Aperture,
+  Zap as Flash
 } from "lucide-react";
 import { useState } from "react";
 
@@ -208,50 +211,105 @@ export default function Styleguide() {
 
             {/* Buttons */}
             <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">Buttons</h3>
+              <h3 className="text-xl font-semibold mb-4">Photography-Focused Buttons</h3>
               <Card>
                 <CardContent className="p-6">
-                  <div className="flex flex-wrap gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div className="space-y-2">
-                      <Button>Default</Button>
-                      <code className="block text-xs">variant="default"</code>
+                      <Button variant="camera" className="w-full">
+                        <Camera className="w-4 h-4" />
+                        Camera
+                      </Button>
+                      <code className="block text-xs text-center">variant="camera"</code>
+                      <p className="text-xs text-muted-foreground text-center">Professional camera body inspired</p>
                     </div>
                     <div className="space-y-2">
-                      <Button variant="secondary">Secondary</Button>
-                      <code className="block text-xs">variant="secondary"</code>
+                      <Button variant="lens" className="w-full">
+                        <Aperture className="w-4 h-4" />
+                        Lens
+                      </Button>
+                      <code className="block text-xs text-center">variant="lens"</code>
+                      <p className="text-xs text-muted-foreground text-center">Premium lens coating gradient</p>
                     </div>
                     <div className="space-y-2">
-                      <Button variant="outline">Outline</Button>
-                      <code className="block text-xs">variant="outline"</code>
+                      <Button variant="aperture" className="w-full">
+                        <Aperture className="w-4 h-4" />
+                        Aperture
+                      </Button>
+                      <code className="block text-xs text-center">variant="aperture"</code>
+                      <p className="text-xs text-muted-foreground text-center">Clean aperture ring style</p>
                     </div>
                     <div className="space-y-2">
-                      <Button variant="ghost">Ghost</Button>
-                      <code className="block text-xs">variant="ghost"</code>
+                      <Button variant="shutter" className="w-full">
+                        <Flash className="w-4 h-4" />
+                        Shutter
+                      </Button>
+                      <code className="block text-xs text-center">variant="shutter"</code>
+                      <p className="text-xs text-muted-foreground text-center">Golden hour warmth</p>
                     </div>
                     <div className="space-y-2">
-                      <Button variant="destructive">Destructive</Button>
-                      <code className="block text-xs">variant="destructive"</code>
+                      <Button variant="darkroom" className="w-full">
+                        <div className="w-4 h-4 rounded-full bg-red-400" />
+                        Darkroom
+                      </Button>
+                      <code className="block text-xs text-center">variant="darkroom"</code>
+                      <p className="text-xs text-muted-foreground text-center">Classic darkroom safelight</p>
                     </div>
                     <div className="space-y-2">
-                      <Button variant="hero">Hero</Button>
-                      <code className="block text-xs">variant="hero"</code>
+                      <Button variant="hero" className="w-full">
+                        <Zap className="w-4 h-4" />
+                        Hero
+                      </Button>
+                      <code className="block text-xs text-center">variant="hero"</code>
+                      <p className="text-xs text-muted-foreground text-center">Primary action button</p>
                     </div>
                   </div>
                   
                   <Separator className="my-6" />
                   
-                  <div className="flex flex-wrap gap-4">
-                    <div className="space-y-2">
-                      <Button size="sm">Small</Button>
-                      <code className="block text-xs">size="sm"</code>
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Standard Variants</h4>
+                    <div className="flex flex-wrap gap-4">
+                      <div className="space-y-2">
+                        <Button>Default</Button>
+                        <code className="block text-xs">variant="default"</code>
+                      </div>
+                      <div className="space-y-2">
+                        <Button variant="secondary">Secondary</Button>
+                        <code className="block text-xs">variant="secondary"</code>
+                      </div>
+                      <div className="space-y-2">
+                        <Button variant="outline">Outline</Button>
+                        <code className="block text-xs">variant="outline"</code>
+                      </div>
+                      <div className="space-y-2">
+                        <Button variant="ghost">Ghost</Button>
+                        <code className="block text-xs">variant="ghost"</code>
+                      </div>
+                      <div className="space-y-2">
+                        <Button variant="destructive">Destructive</Button>
+                        <code className="block text-xs">variant="destructive"</code>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Button size="default">Default</Button>
-                      <code className="block text-xs">size="default"</code>
-                    </div>
-                    <div className="space-y-2">
-                      <Button size="lg">Large</Button>
-                      <code className="block text-xs">size="lg"</code>
+                  </div>
+                  
+                  <Separator className="my-6" />
+                  
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Button Sizes</h4>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="space-y-2">
+                        <Button variant="camera" size="sm">Small</Button>
+                        <code className="block text-xs">size="sm"</code>
+                      </div>
+                      <div className="space-y-2">
+                        <Button variant="lens" size="default">Default</Button>
+                        <code className="block text-xs">size="default"</code>
+                      </div>
+                      <div className="space-y-2">
+                        <Button variant="shutter" size="lg">Large</Button>
+                        <code className="block text-xs">size="lg"</code>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
