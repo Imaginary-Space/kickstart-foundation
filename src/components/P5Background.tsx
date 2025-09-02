@@ -7,24 +7,22 @@ interface Particle {
   vx: number;
   vy: number;
   size: number;
-  alpha: number;
   hue: number;
 }
 
 export const P5Background = () => {
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const sketchRef = useRef<p5 | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!containerRef.current) return;
 
     const sketch = (p: p5) => {
       let particles: Particle[] = [];
-      let mouseInfluence = { x: 0, y: 0 };
+      let mouseInfluence = 100;
       
       p.setup = () => {
         const canvas = p.createCanvas(p.windowWidth, p.windowHeight);
-        canvas.parent(canvasRef.current!);
+        canvas.parent(containerRef.current!);
         
         // Initialize particles
         for (let i = 0; i < 50; i++) {
@@ -33,72 +31,67 @@ export const P5Background = () => {
             y: p.random(p.height),
             vx: p.random(-1, 1),
             vy: p.random(-1, 1),
-            size: p.random(20, 80),
-            alpha: p.random(0.1, 0.3),
-            hue: p.random(350, 370) // Red hues
+            size: p.random(2, 8),
+            hue: p.random(0, 30) // Red spectrum
           });
         }
+        
+        p.colorMode(p.HSB, 360, 100, 100, 1);
+        p.background(0, 0, 0, 0);
       };
 
       p.draw = () => {
-        p.clear();
-        p.background(0, 0, 0, 0); // Transparent background
+        p.background(0, 0, 0, 0.05); // Slight trail effect
         
-        // Update mouse influence
-        mouseInfluence.x = p.lerp(mouseInfluence.x, p.mouseX, 0.05);
-        mouseInfluence.y = p.lerp(mouseInfluence.y, p.mouseY, 0.05);
-        
-        // Draw swirls
-        particles.forEach((particle, i) => {
-          // Calculate distance to mouse
-          const mouseDistance = p.dist(particle.x, particle.y, mouseInfluence.x, mouseInfluence.y);
-          const influence = p.map(mouseDistance, 0, 200, 1, 0);
+        // Update and draw particles
+        for (let i = 0; i < particles.length; i++) {
+          const particle = particles[i];
           
-          // Apply mouse influence
-          const mouseForceX = (mouseInfluence.x - particle.x) * influence * 0.01;
-          const mouseForceY = (mouseInfluence.y - particle.y) * influence * 0.01;
-          
-          // Add swirl motion
-          const angle = p.atan2(particle.y - p.height/2, particle.x - p.width/2);
-          const swirlForceX = -p.sin(angle + p.frameCount * 0.01) * 0.5;
-          const swirlForceY = p.cos(angle + p.frameCount * 0.01) * 0.5;
-          
-          // Update velocity
-          particle.vx += mouseForceX + swirlForceX;
-          particle.vy += mouseForceY + swirlForceY;
-          
-          // Apply friction
-          particle.vx *= 0.95;
-          particle.vy *= 0.95;
+          // Mouse interaction
+          const mouseDistance = p.dist(p.mouseX, p.mouseY, particle.x, particle.y);
+          if (mouseDistance < mouseInfluence && p.mouseX > 0 && p.mouseY > 0) {
+            const force = (mouseInfluence - mouseDistance) / mouseInfluence;
+            const angle = p.atan2(particle.y - p.mouseY, particle.x - p.mouseX);
+            particle.vx += p.cos(angle) * force * 0.1;
+            particle.vy += p.sin(angle) * force * 0.1;
+          }
           
           // Update position
           particle.x += particle.vx;
           particle.y += particle.vy;
           
-          // Wrap around edges
-          if (particle.x < -50) particle.x = p.width + 50;
-          if (particle.x > p.width + 50) particle.x = -50;
-          if (particle.y < -50) particle.y = p.height + 50;
-          if (particle.y > p.height + 50) particle.y = -50;
+          // Boundary wrapping
+          if (particle.x < 0) particle.x = p.width;
+          if (particle.x > p.width) particle.x = 0;
+          if (particle.y < 0) particle.y = p.height;
+          if (particle.y > p.height) particle.y = 0;
           
-          // Draw particle with swirl trail
-          p.push();
-          p.translate(particle.x, particle.y);
-          p.rotate(p.atan2(particle.vy, particle.vx));
+          // Damping
+          particle.vx *= 0.99;
+          particle.vy *= 0.99;
           
-          // Create gradient effect
-          const steps = 10;
-          for (let j = 0; j < steps; j++) {
-            const alpha = particle.alpha * (1 - j / steps);
-            const size = particle.size * (1 - j / steps * 0.8);
+          // Add slight random movement
+          particle.vx += p.random(-0.02, 0.02);
+          particle.vy += p.random(-0.02, 0.02);
+          
+          // Draw particle
+          p.fill(particle.hue, 80, 90, 0.8);
+          p.noStroke();
+          p.ellipse(particle.x, particle.y, particle.size);
+          
+          // Connect nearby particles
+          for (let j = i + 1; j < particles.length; j++) {
+            const other = particles[j];
+            const distance = p.dist(particle.x, particle.y, other.x, other.y);
             
-            p.fill(particle.hue % 360, 70, 80, alpha);
-            p.noStroke();
-            p.ellipse(-j * 5, 0, size, size * 0.6);
+            if (distance < 80) {
+              const alpha = p.map(distance, 0, 80, 0.3, 0);
+              p.stroke(particle.hue, 60, 70, alpha);
+              p.strokeWeight(1);
+              p.line(particle.x, particle.y, other.x, other.y);
+            }
           }
-          
-          p.pop();
-        });
+        }
       };
 
       p.windowResized = () => {
@@ -106,21 +99,18 @@ export const P5Background = () => {
       };
     };
 
-    sketchRef.current = new p5(sketch);
+    const p5Instance = new p5(sketch);
 
     return () => {
-      if (sketchRef.current) {
-        sketchRef.current.remove();
-        sketchRef.current = null;
-      }
+      p5Instance.remove();
     };
   }, []);
 
   return (
     <div 
-      ref={canvasRef} 
-      className="absolute inset-0 pointer-events-none z-0"
-      style={{ mixBlendMode: 'screen' }}
+      ref={containerRef} 
+      className="absolute inset-0 pointer-events-none"
+      style={{ zIndex: 1 }}
     />
   );
 };

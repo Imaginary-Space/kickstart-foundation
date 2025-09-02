@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { P5Background } from "@/components/P5Background";
 import heroImage from "@/assets/hero-image.jpg";
-import { P5Background } from "./P5Background";
 
 export const Hero = () => {
   return (
@@ -13,7 +13,7 @@ export const Hero = () => {
         <img 
           src={heroImage} 
           alt="Modern abstract background with flowing gradients"
-          className="w-full h-full object-cover opacity-5"
+          className="w-full h-full object-cover opacity-10"
         />
       </div>
       
