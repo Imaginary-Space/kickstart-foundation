@@ -75,7 +75,7 @@ export const Features = () => {
         </div>
 
         <div className="text-center animate-slide-up">
-          <Button variant="hero" size="lg" className="text-lg px-8 py-6">
+          <Button variant="default" size="lg" className="text-lg px-8 py-6">
             See It In Action - Free Demo
           </Button>
         </div>

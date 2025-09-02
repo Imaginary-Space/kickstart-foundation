@@ -66,7 +66,7 @@ const Login = () => {
             </div>
 
             <Button 
-              variant="hero" 
+              variant="default" 
               size="lg" 
               className="w-full text-lg py-6"
               type="submit"
@@ -87,10 +87,10 @@ const Login = () => {
 
           {/* Social Login */}
           <div className="space-y-3">
-            <Button variant="outline" className="w-full" type="button">
+            <Button variant="ghost" className="w-full" type="button">
               Continue with Google
             </Button>
-            <Button variant="outline" className="w-full" type="button">
+            <Button variant="ghost" className="w-full" type="button">
               Continue with GitHub
             </Button>
           </div>

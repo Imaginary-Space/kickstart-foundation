@@ -21,7 +21,7 @@ export const Footer = () => {
                 placeholder="Enter your email"
                 className="flex-1"
               />
-              <Button variant="hero" className="whitespace-nowrap">
+              <Button variant="default" className="whitespace-nowrap">
                 Get Free Guide
               </Button>
             </div>
@@ -119,7 +119,7 @@ export const Footer = () => {
               <Mail className="w-4 h-4 mr-2" />
               Contact
             </Button>
-            <Button variant="hero" size="sm">
+            <Button variant="default" size="sm">
               Try Free
             </Button>
           </div>
@@ -128,7 +128,7 @@ export const Footer = () => {
 
       {/* Sticky CTA for mobile */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border p-4 md:hidden z-50">
-        <Button variant="hero" size="lg" className="w-full">
+        <Button variant="default" size="lg" className="w-full">
           Start Free Trial - No Credit Card Required
         </Button>
       </div>

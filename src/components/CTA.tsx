@@ -13,10 +13,10 @@ export const CTA = () => {
             The possibilities are endless.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
-            <Button variant="hero" size="lg" className="text-lg px-8 py-6">
+            <Button variant="default" size="lg" className="text-lg px-8 py-6">
               Start Building
             </Button>
-            <Button variant="secondary" size="lg" className="text-lg px-8 py-6">
+            <Button variant="ghost" size="lg" className="text-lg px-8 py-6">
               View Documentation
             </Button>
           </div>

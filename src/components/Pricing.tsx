@@ -120,7 +120,7 @@ export const Pricing = () => {
                 </ul>
                 
                 <Button 
-                  variant={plan.popular ? "hero" : "outline"} 
+                  variant={plan.popular ? "default" : "ghost"} 
                   className="w-full"
                   size="lg"
                 >
