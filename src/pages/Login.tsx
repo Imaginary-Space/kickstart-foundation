@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 
 const Login = () => {
-  const { signIn, signInWithOAuth, user, loading } = useAuth();
+  const { signIn, signInWithOAuth, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -28,7 +28,6 @@ const Login = () => {
     setFormLoading(true);
 
     if (isSignUp) {
-      const { signUp } = await import('@/contexts/AuthContext').then(m => ({ signUp: useAuth().signUp }));
       await signUp(email, password, fullName);
     } else {
       await signIn(email, password);
