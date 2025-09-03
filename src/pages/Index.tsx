@@ -8,22 +8,22 @@ import { Footer } from "@/components/Footer";
 const Index = () => {
   return (
     <main className="min-h-screen">
-      {/* Barra de navegación con logo y elementos del menú */}
+      {/* Fixed navigation bar with company logo and main navigation links */}
       <Navbar />
       
-      {/* Sección hero con título principal y botones de llamada a la acción */}
+      {/* Hero section featuring main value proposition, headline, and primary CTA buttons */}
       <Hero />
       
-      {/* Sección de características principales */}
+      {/* Product features section showcasing AI-powered photo organization capabilities */}
       <Features />
       
-      {/* Testimonios y reseñas de clientes */}
+      {/* Social proof section with customer testimonials, ratings, and success stories */}
       <Testimonials />
       
-      {/* Planes de precios y paquetes */}
+      {/* Pricing section displaying different subscription plans and feature comparisons */}
       <Pricing />
       
-      {/* Pie de página con enlaces e información de la empresa */}
+      {/* Site footer with additional links, contact information, and secondary CTAs */}
       <Footer />
     </main>
   );
