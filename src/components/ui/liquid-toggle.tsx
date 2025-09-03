@@ -4,7 +4,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 const styles = {
-  switch: `relative block cursor-pointer h-8 w-[52px]
+  switch: `relative block cursor-pointer h-6 w-10
     [--c-active:#275EFE]
     [--c-success:#10B981]
     [--c-warning:#F59E0B]
@@ -75,36 +75,36 @@ export function Toggle({
         className={cn(styles.input, variantStyles[variant])}
       />
       <svg
-        viewBox="0 0 52 32"
+        viewBox="0 0 40 24"
         filter="url(#goo)"
         className={styles.svg}
       >
         <circle
           className={styles.circle}
-          cx="16"
-          cy="16"
-          r="10"
+          cx="12"
+          cy="12"
+          r="7"
           style={{
-            transformOrigin: '16px 16px',
-            transform: `translateX(${isChecked ? '12px' : '0px'}) scale(${isChecked ? '0' : '1'})`,
+            transformOrigin: '12px 12px',
+            transform: `translateX(${isChecked ? '9px' : '0px'}) scale(${isChecked ? '0' : '1'})`,
           }}
         />
         <circle
           className={styles.circle}
-          cx="36"
-          cy="16"
-          r="10"
+          cx="28"
+          cy="12"
+          r="7"
           style={{
-            transformOrigin: '36px 16px',
-            transform: `translateX(${isChecked ? '0px' : '-12px'}) scale(${isChecked ? '1' : '0'})`,
+            transformOrigin: '28px 12px',
+            transform: `translateX(${isChecked ? '0px' : '-9px'}) scale(${isChecked ? '1' : '0'})`,
           }}
         />
         {isChecked && (
           <circle
             className={styles.dropCircle}
-            cx="35"
-            cy="-1"
-            r="2.5"
+            cx="27"
+            cy="0"
+            r="1.8"
           />
         )}
       </svg>
