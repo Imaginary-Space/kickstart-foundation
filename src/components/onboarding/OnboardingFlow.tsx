@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -23,8 +22,7 @@ const OnboardingFlow = () => {
     use_cases: [],
   });
   
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
 
   const updateData = (field: keyof OnboardingData, value: any) => {
@@ -74,8 +72,11 @@ const OnboardingFlow = () => {
         description: "Your profile has been set up successfully.",
       });
 
-      // Navigate to dashboard immediately without waiting for the ProtectedRoute check
-      navigate('/dashboard', { replace: true });
+      // Refresh profile data to trigger realtime update
+      await refreshProfile();
+      
+      // The realtime subscription in AuthContext will handle navigation
+      // via ProtectedRoute when onboarding_completed becomes true
     } catch (error) {
       console.error('Error in handleComplete:', error);
       toast({
