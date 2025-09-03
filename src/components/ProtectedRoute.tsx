@@ -1,14 +1,32 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useLocation } from "react-router-dom";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading, onboardingCompleted } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .single();
+        
+        setOnboardingCompleted(profile?.onboarding_completed || false);
+      }
+    };
+
+    checkOnboardingStatus();
+  }, [user]);
 
   if (loading || (user && onboardingCompleted === null)) {
     return (

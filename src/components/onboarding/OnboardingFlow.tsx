@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +23,8 @@ const OnboardingFlow = () => {
     use_cases: [],
   });
   
-  const { user, refreshProfile } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const updateData = (field: keyof OnboardingData, value: any) => {
@@ -58,7 +60,6 @@ const OnboardingFlow = () => {
         .eq('id', user.id);
 
       if (error) {
-        console.error('Error updating profile:', error);
         toast({
           title: "Error",
           description: "Failed to save onboarding data. Please try again.",
@@ -72,13 +73,8 @@ const OnboardingFlow = () => {
         description: "Your profile has been set up successfully.",
       });
 
-      // Refresh profile data to trigger realtime update
-      await refreshProfile();
-      
-      // The realtime subscription in AuthContext will handle navigation
-      // via ProtectedRoute when onboarding_completed becomes true
+      navigate('/dashboard');
     } catch (error) {
-      console.error('Error in handleComplete:', error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
