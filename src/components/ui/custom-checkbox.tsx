@@ -10,8 +10,8 @@ const CustomCheckbox = React.forwardRef<HTMLInputElement, React.InputHTMLAttribu
         type="checkbox"
         ref={ref}
         className={cn(
-          "border-1 relative box-border block h-[1.5rem] w-[1.5rem] cursor-pointer appearance-none rounded-md border-[#d9d9d9] bg-slate-200 transition-all duration-300",
-          "before:absolute before:left-2/4 before:top-[42%] before:h-[10px] before:w-[6px]",
+          "border-1 relative box-border block h-[0.75rem] w-[0.75rem] cursor-pointer appearance-none rounded-md border-[#d9d9d9] bg-slate-200 transition-all duration-300",
+          "before:absolute before:left-2/4 before:top-[42%] before:h-[5px] before:w-[3px]",
           "before:-translate-x-2/4 before:-translate-y-2/4 before:rotate-45 before:scale-0",
           "before:border-b-2 before:border-r-2 before:border-solid before:border-b-white before:border-r-white",
           "before:opacity-0 before:transition-all before:delay-100 before:duration-100 before:ease-in before:content-['']",
