@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Menu } from "lucide-react";
+import { ImageIcon, Menu, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Navbar = () => {
+  const { user, signOut } = useAuth();
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-6 py-4">
@@ -33,10 +36,26 @@ export const Navbar = () => {
           
           {/* CTA Button */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" asChild>
-              <Link to="/login">Sign In</Link>
-            </Button>
-            <Button variant="default">Try Free</Button>
+            {user ? (
+              <>
+                <span className="text-sm text-muted-foreground">
+                  Hola, {user.user_metadata?.full_name || user.email}
+                </span>
+                <Button variant="ghost" onClick={signOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Cerrar Sesión
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/login">Iniciar Sesión</Link>
+                </Button>
+                <Button variant="default" asChild>
+                  <Link to="/login">Prueba Gratis</Link>
+                </Button>
+              </>
+            )}
           </div>
           
           {/* Mobile Menu Button */}
