@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
+import TodoManager from "@/components/TodoManager";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -39,14 +40,9 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content */}
-        <Card className="p-8 bg-card/50 backdrop-blur-sm border-0">
-          <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-4">Tu Dashboard</h2>
-            <p className="text-muted-foreground">
-              Este es tu espacio personal. Próximamente agregaremos más funcionalidades.
-            </p>
-          </div>
-        </Card>
+        <div className="grid gap-6">
+          <TodoManager />
+        </div>
       </div>
     </div>
   );
