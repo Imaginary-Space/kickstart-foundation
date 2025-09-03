@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
 import TodoManager from "@/components/TodoManager";
 import WeatherWidget from "@/components/WeatherWidget";
+import FeedbackFab from "@/components/FeedbackFab";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -46,6 +47,9 @@ const Dashboard = () => {
           <WeatherWidget />
         </div>
       </div>
+
+      {/* Feedback FAB */}
+      <FeedbackFab />
     </div>
   );
 };
