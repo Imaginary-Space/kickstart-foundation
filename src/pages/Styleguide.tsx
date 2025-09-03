@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Toggle, GooeyFilter } from "@/components/ui/liquid-toggle";
+import { CustomCheckbox } from "@/components/ui/custom-checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -102,9 +102,13 @@ const ColorSwatch = ({ token }: { token: typeof colorTokens[0] }) => (
 export default function Styleguide() {
   const [darkMode, setDarkMode] = useState(false);
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle('dark');
+  const toggleDarkMode = (checked: boolean) => {
+    setDarkMode(checked);
+    if (checked) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   };
 
   return (
@@ -125,10 +129,7 @@ export default function Styleguide() {
           </p>
           <div className="flex items-center justify-center gap-2 mt-4">
             <Sun className="h-4 w-4" />
-            <div className="relative">
-              <GooeyFilter />
-              <Toggle checked={darkMode} onCheckedChange={toggleDarkMode} />
-            </div>
+            <CustomCheckbox checked={darkMode} onChange={(e) => toggleDarkMode(e.target.checked)} />
             <Moon className="h-4 w-4" />
           </div>
         </header>
@@ -283,11 +284,8 @@ export default function Styleguide() {
                     <label htmlFor="checkbox" className="text-sm">Checkbox</label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="relative">
-                      <GooeyFilter />
-                      <Toggle />
-                    </div>
-                    <label className="text-sm">Liquid Toggle</label>
+                    <CustomCheckbox />
+                    <label className="text-sm">Custom Checkbox</label>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Slider</label>
