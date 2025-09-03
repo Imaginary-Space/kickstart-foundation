@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
+import { Toggle, GooeyFilter } from "@/components/ui/liquid-toggle";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -125,7 +125,10 @@ export default function Styleguide() {
           </p>
           <div className="flex items-center justify-center gap-2 mt-4">
             <Sun className="h-4 w-4" />
-            <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
+            <div className="relative">
+              <GooeyFilter />
+              <Toggle checked={darkMode} onCheckedChange={toggleDarkMode} />
+            </div>
             <Moon className="h-4 w-4" />
           </div>
         </header>
@@ -280,8 +283,11 @@ export default function Styleguide() {
                     <label htmlFor="checkbox" className="text-sm">Checkbox</label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Switch id="switch" />
-                    <label htmlFor="switch" className="text-sm">Switch</label>
+                    <div className="relative">
+                      <GooeyFilter />
+                      <Toggle />
+                    </div>
+                    <label className="text-sm">Liquid Toggle</label>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Slider</label>
