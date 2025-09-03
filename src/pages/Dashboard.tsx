@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
 import TodoManager from "@/components/TodoManager";
+import WeatherWidget from "@/components/WeatherWidget";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -40,8 +41,9 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content */}
-        <div className="grid gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
           <TodoManager />
+          <WeatherWidget />
         </div>
       </div>
     </div>
