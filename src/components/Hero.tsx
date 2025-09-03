@@ -3,21 +3,42 @@ import { Input } from "@/components/ui/input";
 import { P5Background } from "@/components/P5Background";
 import { useState } from "react";
 import { Mail, ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-image.jpg";
 export const Hero = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setIsSubmitting(true);
-    // Simulate API call - replace with actual email collection logic
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitted(true);
-    setIsSubmitting(false);
+    setError("");
+
+    try {
+      const { error: insertError } = await supabase
+        .from('waitlist')
+        .insert([{ email }]);
+
+      if (insertError) {
+        if (insertError.code === '23505') { // Unique constraint violation
+          setError("This email is already on our waitlist!");
+        } else {
+          setError("Something went wrong. Please try again.");
+        }
+        console.error('Error adding to waitlist:', insertError);
+      } else {
+        setIsSubmitted(true);
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      console.error('Error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -65,6 +86,9 @@ export const Hero = () => {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
+              {error && (
+                <p className="text-red-600 text-sm mb-2">{error}</p>
+              )}
               <p className="text-sm text-muted-foreground">
                 Get early access + exclusive launch discount
               </p>
