@@ -60,6 +60,7 @@ const OnboardingFlow = () => {
         .eq('id', user.id);
 
       if (error) {
+        console.error('Error updating profile:', error);
         toast({
           title: "Error",
           description: "Failed to save onboarding data. Please try again.",
@@ -73,8 +74,10 @@ const OnboardingFlow = () => {
         description: "Your profile has been set up successfully.",
       });
 
-      navigate('/dashboard');
+      // Navigate to dashboard immediately without waiting for the ProtectedRoute check
+      navigate('/dashboard', { replace: true });
     } catch (error) {
+      console.error('Error in handleComplete:', error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",

@@ -15,13 +15,25 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('id', user.id)
-          .single();
-        
-        setOnboardingCompleted(profile?.onboarding_completed || false);
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('id', user.id)
+            .maybeSingle();
+          
+          if (error) {
+            console.error('Error fetching profile:', error);
+            setOnboardingCompleted(false);
+          } else {
+            setOnboardingCompleted(profile?.onboarding_completed || false);
+          }
+        } catch (error) {
+          console.error('Error in checkOnboardingStatus:', error);
+          setOnboardingCompleted(false);
+        }
+      } else {
+        setOnboardingCompleted(null);
       }
     };
 
