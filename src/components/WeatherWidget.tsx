@@ -46,14 +46,17 @@ const WeatherWidget = () => {
 
   const fetchWeatherData = async (lat: number, lon: number) => {
     try {
-      const currentYear = new Date().getFullYear();
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
+      
       const { data, error } = await supabase.functions.invoke('get-weather', {
         body: {
           lat,
           lon,
           alt: 100,
           start: `${currentYear}-01-01`,
-          end: `${currentYear}-12-31`
+          end: `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`
         }
       });
 
@@ -69,7 +72,15 @@ const WeatherWidget = () => {
 
   const getLatestWeatherData = () => {
     if (!weatherData?.data || weatherData.data.length === 0) return null;
-    return weatherData.data[weatherData.data.length - 1];
+    
+    // Find the most recent entry with actual data (non-null tavg)
+    for (let i = weatherData.data.length - 1; i >= 0; i--) {
+      const entry = weatherData.data[i];
+      if (entry.tavg !== null && entry.tavg !== undefined) {
+        return entry;
+      }
+    }
+    return null;
   };
 
   const latestData = getLatestWeatherData();
@@ -134,6 +145,12 @@ const WeatherWidget = () => {
             Data from: {latestData.date}
           </p>
         </div>
+      )}
+
+      {weatherData && !latestData && !loading && (
+        <p className="text-muted-foreground text-center py-8">
+          No weather data available for this location
+        </p>
       )}
 
       {!weatherData && !loading && !error && (
