@@ -3,14 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
-import TodoManager from "@/components/TodoManager";
-import WeatherWidget from "@/components/WeatherWidget";
-import FeedbackFab from "@/components/FeedbackFab";
-import FeedbackTable from "@/components/FeedbackTable";
+import { FileDropZone } from "@/components/PhotoRenamer/FileDropZone";
+import { usePhotoRenamer } from "@/hooks/usePhotoRenamer";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  
+  const {
+    files,
+    isProcessing,
+    progress,
+    previewMode,
+    handleFiles,
+    selectAllFiles,
+    deselectAllFiles,
+    clearAllFiles,
+    setPreviewMode,
+  } = usePhotoRenamer();
 
   const handleSignOut = async () => {
     await signOut();
@@ -42,14 +52,19 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        {/* Main Content */}
-        <div className="grid gap-6 md:grid-cols-2">
-         
-        </div>
-
-        {/* Feedback Table */}
-        <div className="mt-6">
-          
+        {/* Photo Upload */}
+        <div className="w-full">
+          <FileDropZone
+            onFiles={handleFiles}
+            isProcessing={isProcessing}
+            progress={progress}
+            fileCount={files.length}
+            onSelectAll={selectAllFiles}
+            onDeselectAll={deselectAllFiles}
+            onClearAll={clearAllFiles}
+            previewMode={previewMode}
+            onPreviewModeChange={setPreviewMode}
+          />
         </div>
       </div>
 
