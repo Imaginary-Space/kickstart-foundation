@@ -5,22 +5,24 @@ import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
 import { FileDropZone } from "@/components/PhotoRenamer/FileDropZone";
 import { usePhotoRenamer } from "@/hooks/usePhotoRenamer";
+import { usePhotoGallery } from "@/hooks/usePhotoGallery";
+import PhotoGallery from "@/components/PhotoGallery";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   
-  const {
-    files,
-    isProcessing,
-    progress,
-    previewMode,
-    handleFiles,
-    selectAllFiles,
-    deselectAllFiles,
-    clearAllFiles,
-    setPreviewMode,
-  } = usePhotoRenamer();
+  const { uploadPhoto, loading } = usePhotoGallery();
+
+  const handleFiles = async (files: File[]) => {
+    for (const file of files) {
+      if (file.type.startsWith('image/')) {
+        await uploadPhoto(file);
+      }
+    }
+  };
+
+  const noOpFunction = () => {};
 
   const handleSignOut = async () => {
     await signOut();
@@ -53,19 +55,22 @@ const Dashboard = () => {
         </div>
 
         {/* Photo Upload */}
-        <div className="w-full">
+        <div className="w-full mb-8">
           <FileDropZone
             onFiles={handleFiles}
-            isProcessing={isProcessing}
-            progress={progress}
-            fileCount={files.length}
-            onSelectAll={selectAllFiles}
-            onDeselectAll={deselectAllFiles}
-            onClearAll={clearAllFiles}
-            previewMode={previewMode}
-            onPreviewModeChange={setPreviewMode}
+            isProcessing={loading}
+            progress={0}
+            fileCount={0}
+            onSelectAll={noOpFunction}
+            onDeselectAll={noOpFunction}
+            onClearAll={noOpFunction}
+            previewMode="grid"
+            onPreviewModeChange={noOpFunction}
           />
         </div>
+
+        {/* Photo Gallery */}
+        <PhotoGallery />
       </div>
 
   
