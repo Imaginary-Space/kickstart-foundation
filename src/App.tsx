@@ -10,7 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Styleguide from "./pages/Styleguide";
-import HeyHarry from "./pages/HeyHarry";
+
 import TestimonialsPage from "./pages/Testimonials";
 import NotFound from "./pages/NotFound";
 
@@ -37,7 +37,7 @@ const App = () => (
             } />
             <Route path="/login" element={<Login />} />
             <Route path="/styleguide" element={<Styleguide />} />
-            <Route path="/hey-harry" element={<HeyHarry />} />
+            
             <Route path="/testimonials" element={<TestimonialsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
