@@ -180,29 +180,57 @@
   .orb-background::before {
     content: '';
     position: absolute;
-    top: 20%;
-    right: 20%;
-    width: 600px;
-    height: 600px;
-    background: var(--gradient-orb);
+    top: 10%;
+    right: 15%;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, hsl(var(--primary) / 0.8), hsl(var(--primary) / 0.4), transparent 60%);
     border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.8;
-    animation: float 20s ease-in-out infinite;
+    filter: blur(120px);
+    opacity: 0.9;
+    animation: float 25s ease-in-out infinite;
   }
 
   .orb-background::after {
     content: '';
     position: absolute;
-    bottom: 20%;
-    left: 10%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, hsl(var(--secondary) / 0.4), hsl(var(--accent) / 0.3), transparent 70%);
+    bottom: 10%;
+    left: 5%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, hsl(var(--secondary) / 0.6), hsl(var(--accent) / 0.4), transparent 60%);
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.7;
+    animation: float 30s ease-in-out infinite reverse;
+  }
+
+  /* Additional orbs for enhanced glassmorphism */
+  .extra-orb-1 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, hsl(var(--accent) / 0.5), transparent 70%);
     border-radius: 50%;
     filter: blur(80px);
     opacity: 0.6;
-    animation: float 25s ease-in-out infinite reverse;
+    animation: float 35s ease-in-out infinite;
+    transform: translate(-50%, -50%);
+  }
+
+  .extra-orb-2 {
+    position: absolute;
+    top: 70%;
+    right: 30%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, hsl(var(--primary) / 0.3), hsl(var(--secondary) / 0.2), transparent 65%);
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.8;
+    animation: float 40s ease-in-out infinite reverse;
   }
 }
 

@@ -32,7 +32,10 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-subtle p-6 relative">
       {/* Glass orb background */}
-      <div className="orb-background"></div>
+      <div className="orb-background">
+        <div className="extra-orb-1"></div>
+        <div className="extra-orb-2"></div>
+      </div>
       
       <div className="max-w-4xl mx-auto relative z-10">
         {/* Header */}
@@ -75,7 +78,7 @@ const Dashboard = () => {
         </div>
 
         {/* Photo Gallery */}
-        <PhotoGallery />
+        <PhotoGallery className="glass-card border-0" />
       </div>
 
   

@@ -243,30 +243,30 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
                          <Trash2 className="w-4 h-4" />
                        </Button>
                      </div>
-                  </div>
-                  
-                  {/* Photo info */}
-                  <div className="p-3">
-                    <h4 className="font-medium text-sm truncate mb-2" title={photo.original_name}>
-                      {photo.original_name}
-                    </h4>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <HardDrive className="w-3 h-3" />
-                        {formatFileSize(photo.file_size)}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {format(new Date(photo.created_at), 'MMM d')}
-                      </div>
-                    </div>
-                    {photo.width && photo.height && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {photo.width} × {photo.height}
-                      </div>
-                    )}
-                  </div>
-                </Card>
+                   </div>
+                   
+                   {/* Photo info */}
+                   <div className="p-3 glass border-0">
+                     <h4 className="font-medium text-sm truncate mb-2" title={photo.original_name}>
+                       {photo.original_name}
+                     </h4>
+                     <div className="flex items-center justify-between text-xs text-muted-foreground">
+                       <div className="flex items-center gap-1">
+                         <HardDrive className="w-3 h-3" />
+                         {formatFileSize(photo.file_size)}
+                       </div>
+                       <div className="flex items-center gap-1">
+                         <Calendar className="w-3 h-3" />
+                         {format(new Date(photo.created_at), 'MMM d')}
+                       </div>
+                     </div>
+                     {photo.width && photo.height && (
+                       <div className="text-xs text-muted-foreground mt-1">
+                         {photo.width} × {photo.height}
+                       </div>
+                     )}
+                   </div>
+                 </Card>
               </div>
             ))}
           </div>
