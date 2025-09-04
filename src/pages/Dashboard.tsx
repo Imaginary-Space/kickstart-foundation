@@ -6,6 +6,7 @@ import { LogOut, User } from "lucide-react";
 import TodoManager from "@/components/TodoManager";
 import WeatherWidget from "@/components/WeatherWidget";
 import FeedbackFab from "@/components/FeedbackFab";
+import FeedbackTable from "@/components/FeedbackTable";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -45,6 +46,11 @@ const Dashboard = () => {
         <div className="grid gap-6 md:grid-cols-2">
           <TodoManager />
           <WeatherWidget />
+        </div>
+
+        {/* Feedback Table */}
+        <div className="mt-6">
+          <FeedbackTable />
         </div>
       </div>
 
