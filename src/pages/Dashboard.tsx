@@ -30,7 +30,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle p-6 relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900 p-6 relative">
       {/* Glass orb background */}
       <div className="orb-background">
         <div className="extra-orb-1"></div>
