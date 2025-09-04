@@ -44,18 +44,16 @@ const Dashboard = () => {
 
         {/* Main Content */}
         <div className="grid gap-6 md:grid-cols-2">
-          <TodoManager />
-          <WeatherWidget />
+         
         </div>
 
         {/* Feedback Table */}
         <div className="mt-6">
-          <FeedbackTable />
+          
         </div>
       </div>
 
-      {/* Feedback FAB */}
-      <FeedbackFab />
+  
     </div>
   );
 };
