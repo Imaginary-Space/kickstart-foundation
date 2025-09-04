@@ -3,11 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive } from 'lucide-react';
+import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X } from 'lucide-react';
 import { usePhotoGallery, PhotoMetadata } from '@/hooks/usePhotoGallery';
 import { formatFileSize } from '@/utils/fileProcessing';
 import { format } from 'date-fns';
+import BatchRenameDialog from './BatchRenameDialog';
 
 interface PhotoGalleryProps {
   className?: string;
@@ -17,14 +20,26 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
   const {
     photos,
     loading,
+    isRenaming,
     searchTerm,
     setSearchTerm,
     sortBy,
     setSortBy,
     sortOrder,
     setSortOrder,
+    selectedPhotos,
+    storageUsed,
     deletePhoto,
+    batchRenamePhotos,
+    togglePhotoSelection,
+    selectAllPhotos,
+    clearSelection,
+    deleteSelectedPhotos,
   } = usePhotoGallery();
+
+  const selectedPhotosList = photos.filter(photo => selectedPhotos.has(photo.id));
+  const isAllSelected = photos.length > 0 && selectedPhotos.size === photos.length;
+  const isSomeSelected = selectedPhotos.size > 0;
 
   const handleDeletePhoto = async (photo: PhotoMetadata) => {
     if (window.confirm(`Are you sure you want to delete "${photo.original_name}"?`)) {
@@ -43,6 +58,18 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
     }
   };
 
+  const handleDeleteSelected = async () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedPhotos.size} selected photos?`)) {
+      await deleteSelectedPhotos();
+    }
+  };
+
+  const formatStorageUsage = (bytes: number) => {
+    const mb = bytes / (1024 * 1024);
+    const gb = mb / 1024;
+    return gb >= 1 ? `${gb.toFixed(2)} GB` : `${mb.toFixed(1)} MB`;
+  };
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -52,7 +79,55 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
             Photo Gallery
             <Badge variant="secondary">{photos.length} photos</Badge>
           </CardTitle>
+          
+          {/* Storage Usage */}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <HardDrive className="w-4 h-4" />
+              <span>{formatStorageUsage(storageUsed)} used</span>
+            </div>
+            {isSomeSelected && (
+              <Badge variant="secondary">
+                {selectedPhotos.size} selected
+              </Badge>
+            )}
+          </div>
         </div>
+
+        {/* Batch Actions */}
+        {isSomeSelected && (
+          <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+            <div className="flex items-center gap-2 flex-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearSelection}
+                className="h-8 px-2"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {selectedPhotos.size} photos selected
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <BatchRenameDialog
+                selectedPhotos={selectedPhotosList}
+                onRename={batchRenamePhotos}
+                isRenaming={isRenaming}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDeleteSelected}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Selected
+              </Button>
+            </div>
+          </div>
+        )}
         
         {/* Search and Filter Controls */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -66,7 +141,23 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
             />
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            {photos.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={isAllSelected ? clearSelection : selectAllPhotos}
+                className="flex items-center gap-2"
+              >
+                {isAllSelected ? (
+                  <CheckSquare className="w-4 h-4" />
+                ) : (
+                  <Square className="w-4 h-4" />
+                )}
+                {isAllSelected ? 'Deselect All' : 'Select All'}
+              </Button>
+            )}
+            
             <Select value={sortBy} onValueChange={(value: 'name' | 'date' | 'size') => setSortBy(value)}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Sort by" />
@@ -106,22 +197,31 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {photos.map((photo) => (
-              <div key={photo.id} className="group relative">
-                <Card className="overflow-hidden">
-                  <div className="aspect-square relative">
-                    {photo.url ? (
-                      <img
-                        src={photo.url}
-                        alt={photo.original_name}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-muted flex items-center justify-center">
-                        <FileText className="w-8 h-8 text-muted-foreground" />
-                      </div>
-                    )}
+             {photos.map((photo) => (
+               <div key={photo.id} className="group relative">
+                 <Card className="overflow-hidden">
+                   {/* Selection Checkbox */}
+                   <div className="absolute top-2 left-2 z-10">
+                     <Checkbox
+                       checked={selectedPhotos.has(photo.id)}
+                       onCheckedChange={() => togglePhotoSelection(photo.id)}
+                       className="bg-white/80 border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                     />
+                   </div>
+                   
+                   <div className="aspect-square relative">
+                     {photo.url ? (
+                       <img
+                         src={photo.url}
+                         alt={photo.original_name}
+                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                         loading="lazy"
+                       />
+                     ) : (
+                       <div className="w-full h-full bg-muted flex items-center justify-center">
+                         <FileText className="w-8 h-8 text-muted-foreground" />
+                       </div>
+                     )}
                     
                     {/* Overlay with actions */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import type { RenamePattern } from '@/types/photoRenamer';
+import { generateNewName } from '@/utils/fileNaming';
 
 export interface PhotoMetadata {
   id: string;
@@ -24,6 +26,9 @@ export const usePhotoGallery = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
+  const [storageUsed, setStorageUsed] = useState<number>(0);
+  const [isRenaming, setIsRenaming] = useState(false);
 
   const uploadPhoto = async (file: File): Promise<boolean> => {
     if (!user) {
@@ -121,6 +126,115 @@ export const usePhotoGallery = () => {
     }
   };
 
+  const batchRenamePhotos = async (photosToRename: PhotoMetadata[], pattern: RenamePattern): Promise<boolean> => {
+    try {
+      setIsRenaming(true);
+      let successCount = 0;
+
+      for (let index = 0; index < photosToRename.length; index++) {
+        const photo = photosToRename[index];
+        
+        // Create a mock PhotoFile for the generateNewName function
+        const mockPhotoFile = {
+          id: photo.id,
+          file: new File([], photo.original_name),
+          originalName: photo.original_name,
+          newName: '',
+          preview: '',
+          size: photo.file_size,
+          lastModified: new Date(photo.created_at).getTime(),
+          processed: false,
+          selected: true,
+        };
+
+        const newName = generateNewName(mockPhotoFile, index, pattern);
+        
+        // Update the database with the new name
+        const { error } = await supabase
+          .from('photos')
+          .update({ original_name: newName })
+          .eq('id', photo.id);
+
+        if (!error) {
+          successCount++;
+        } else {
+          console.error(`Error renaming photo ${photo.original_name}:`, error);
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`Successfully renamed ${successCount} photos`);
+        setSelectedPhotos(new Set()); // Clear selection
+        await fetchPhotos(); // Refresh the gallery
+      }
+
+      if (successCount < photosToRename.length) {
+        toast.error(`Failed to rename ${photosToRename.length - successCount} photos`);
+      }
+
+      return successCount === photosToRename.length;
+    } catch (error) {
+      console.error('Error in batch rename:', error);
+      toast.error('Failed to rename photos');
+      return false;
+    } finally {
+      setIsRenaming(false);
+    }
+  };
+
+  const togglePhotoSelection = (photoId: string) => {
+    setSelectedPhotos(prev => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(photoId)) {
+        newSelection.delete(photoId);
+      } else {
+        newSelection.add(photoId);
+      }
+      return newSelection;
+    });
+  };
+
+  const selectAllPhotos = () => {
+    setSelectedPhotos(new Set(filteredAndSortedPhotos.map(photo => photo.id)));
+  };
+
+  const clearSelection = () => {
+    setSelectedPhotos(new Set());
+  };
+
+  const deleteSelectedPhotos = async (): Promise<boolean> => {
+    const selectedPhotosList = filteredAndSortedPhotos.filter(photo => selectedPhotos.has(photo.id));
+    
+    if (selectedPhotosList.length === 0) return false;
+
+    try {
+      setLoading(true);
+      let successCount = 0;
+
+      for (const photo of selectedPhotosList) {
+        const success = await deletePhoto(photo.id, photo.file_path);
+        if (success) successCount++;
+      }
+
+      if (successCount > 0) {
+        setSelectedPhotos(new Set()); // Clear selection
+        toast.success(`Successfully deleted ${successCount} photos`);
+      }
+
+      return successCount === selectedPhotosList.length;
+    } catch (error) {
+      console.error('Error deleting selected photos:', error);
+      toast.error('Failed to delete selected photos');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateStorageUsed = () => {
+    return photos.reduce((total, photo) => total + photo.file_size, 0);
+  };
+
   const fetchPhotos = async () => {
     if (!user) return;
 
@@ -200,17 +314,29 @@ export const usePhotoGallery = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    setStorageUsed(calculateStorageUsed());
+  }, [photos]);
+
   return {
     photos: filteredAndSortedPhotos,
     loading,
+    isRenaming,
     searchTerm,
     setSearchTerm,
     sortBy,
     setSortBy,
     sortOrder,
     setSortOrder,
+    selectedPhotos,
+    storageUsed: calculateStorageUsed(),
     uploadPhoto,
     deletePhoto,
     fetchPhotos,
+    batchRenamePhotos,
+    togglePhotoSelection,
+    selectAllPhotos,
+    clearSelection,
+    deleteSelectedPhotos,
   };
 };
