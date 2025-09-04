@@ -10,9 +10,11 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import StarRating from "@/components/ui/star-rating";
 
 const feedbackSchema = z.object({
   message: z.string().min(1, "Feedback message is required").max(500, "Feedback must be less than 500 characters"),
+  priority: z.number().min(1, "Priority must be at least 1").max(5, "Priority cannot exceed 5"),
 });
 
 type FeedbackFormData = z.infer<typeof feedbackSchema>;
@@ -27,6 +29,7 @@ const FeedbackFab = () => {
     resolver: zodResolver(feedbackSchema),
     defaultValues: {
       message: "",
+      priority: 3,
     },
   });
 
@@ -41,6 +44,7 @@ const FeedbackFab = () => {
           {
             user_id: user.id,
             message: data.message,
+            priority: data.priority,
           },
         ]);
 
@@ -51,7 +55,10 @@ const FeedbackFab = () => {
         description: "Your feedback has been submitted successfully.",
       });
 
-      form.reset();
+      form.reset({
+        message: "",
+        priority: 3,
+      });
       setOpen(false);
     } catch (error) {
       console.error('Error submitting feedback:', error);
@@ -98,6 +105,29 @@ const FeedbackFab = () => {
                       className="min-h-[100px] resize-none"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="priority"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Priority Level</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-3">
+                      <StarRating
+                        rating={field.value}
+                        onRatingChange={field.onChange}
+                        size="md"
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        ({field.value} star{field.value !== 1 ? 's' : ''})
+                      </span>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

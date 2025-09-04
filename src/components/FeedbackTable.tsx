@@ -12,12 +12,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare } from "lucide-react";
+import StarRating from "@/components/ui/star-rating";
 
 interface Feedback {
   id: string;
   message: string;
   created_at: string;
   user_id: string;
+  priority: number;
 }
 
 const FeedbackTable = () => {
@@ -32,7 +34,8 @@ const FeedbackTable = () => {
       try {
         const { data, error } = await supabase
           .from("feedback")
-          .select("id, message, created_at, user_id")
+          .select("id, message, created_at, user_id, priority")
+          .order("priority", { ascending: false })
           .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -82,6 +85,7 @@ const FeedbackTable = () => {
               <TableRow>
                 <TableHead>Usuario</TableHead>
                 <TableHead>Mensaje</TableHead>
+                <TableHead className="w-32">Prioridad</TableHead>
                 <TableHead className="w-32">Enviado</TableHead>
               </TableRow>
             </TableHeader>
@@ -95,6 +99,9 @@ const FeedbackTable = () => {
                     <div className="truncate" title={item.message}>
                       {item.message}
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <StarRating rating={item.priority} readonly size="sm" />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {formatDistanceToNow(new Date(item.created_at), {
