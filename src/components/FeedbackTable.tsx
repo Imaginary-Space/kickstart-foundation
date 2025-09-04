@@ -17,6 +17,7 @@ interface Feedback {
   id: string;
   message: string;
   created_at: string;
+  user_id: string;
 }
 
 const FeedbackTable = () => {
@@ -31,8 +32,7 @@ const FeedbackTable = () => {
       try {
         const { data, error } = await supabase
           .from("feedback")
-          .select("id, message, created_at")
-          .eq("user_id", user.id)
+          .select("id, message, created_at, user_id")
           .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -53,7 +53,7 @@ const FeedbackTable = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            Tu Feedback
+            Todo el Feedback
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -67,19 +67,20 @@ const FeedbackTable = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="w-5 h-5" />
-          Tu Feedback ({feedback.length})
+            <MessageSquare className="w-5 h-5" />
+            Todo el Feedback ({feedback.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
         {feedback.length === 0 ? (
           <div className="text-muted-foreground text-center py-8">
-            No has enviado feedback aún
+            No hay feedback disponible
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Usuario</TableHead>
                 <TableHead>Mensaje</TableHead>
                 <TableHead className="w-32">Enviado</TableHead>
               </TableRow>
@@ -87,6 +88,9 @@ const FeedbackTable = () => {
             <TableBody>
               {feedback.map((item) => (
                 <TableRow key={item.id}>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {item.user_id.substring(0, 8)}...
+                  </TableCell>
                   <TableCell className="max-w-md">
                     <div className="truncate" title={item.message}>
                       {item.message}
