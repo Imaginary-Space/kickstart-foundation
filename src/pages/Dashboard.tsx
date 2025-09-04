@@ -30,28 +30,33 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-subtle p-6 relative">
+      {/* Glass orb background */}
+      <div className="orb-background"></div>
+      
+      <div className="max-w-4xl mx-auto relative z-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <User className="w-5 h-5 text-primary-foreground" />
+        <div className="glass-header rounded-2xl p-6 mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
+                <User className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Dashboard</h1>
+                <p className="text-muted-foreground">Bienvenido, {user?.email}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">Dashboard</h1>
-              <p className="text-muted-foreground">Bienvenido, {user?.email}</p>
-            </div>
+            
+            <Button 
+              variant="ghost" 
+              onClick={handleSignOut}
+              className="glass flex items-center gap-2 hover:bg-background/20"
+            >
+              <LogOut className="w-4 h-4" />
+              Cerrar Sesión
+            </Button>
           </div>
-          
-          <Button 
-            variant="ghost" 
-            onClick={handleSignOut}
-            className="flex items-center gap-2"
-          >
-            <LogOut className="w-4 h-4" />
-            Cerrar Sesión
-          </Button>
         </div>
 
         {/* Photo Upload */}

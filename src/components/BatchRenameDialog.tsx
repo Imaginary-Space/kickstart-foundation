@@ -68,7 +68,7 @@ const BatchRenameDialog: React.FC<BatchRenameDialogProps> = ({
           Batch Rename ({selectedPhotos.length})
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto glass-card border-0">
         <DialogHeader>
           <DialogTitle>Batch Rename Photos</DialogTitle>
         </DialogHeader>
@@ -80,7 +80,7 @@ const BatchRenameDialog: React.FC<BatchRenameDialogProps> = ({
           </div>
 
           {/* Renaming Pattern */}
-          <Card>
+          <Card className="glass border-0">
             <CardHeader>
               <CardTitle className="text-lg">Rename Pattern</CardTitle>
             </CardHeader>
@@ -184,7 +184,7 @@ const BatchRenameDialog: React.FC<BatchRenameDialogProps> = ({
           </Card>
 
           {/* Preview */}
-          <Card>
+          <Card className="glass border-0">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <FileText className="w-5 h-5" />
@@ -194,7 +194,7 @@ const BatchRenameDialog: React.FC<BatchRenameDialogProps> = ({
             <CardContent>
               <div className="space-y-2">
                 {previewNames.map((newName, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                  <div key={index} className="flex items-center justify-between p-2 glass rounded border-0">
                     <span className="text-sm text-muted-foreground truncate">
                       {selectedPhotos[index]?.original_name}
                     </span>

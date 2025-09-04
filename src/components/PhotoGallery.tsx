@@ -71,8 +71,8 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
+    <Card className={`glass-card border-0 ${className}`}>
+      <CardHeader className="glass-header rounded-t-2xl">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Grid className="w-5 h-5" />
@@ -96,13 +96,13 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
 
         {/* Batch Actions */}
         {isSomeSelected && (
-          <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+          <div className="flex items-center gap-2 p-3 glass rounded-lg border-0">
             <div className="flex items-center gap-2 flex-1">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearSelection}
-                className="h-8 px-2"
+                className="h-8 px-2 glass border-0 hover:bg-background/20"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -120,7 +120,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
                 variant="ghost"
                 size="sm"
                 onClick={handleDeleteSelected}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="text-destructive hover:text-destructive/80 glass border-0 hover:bg-destructive/10"
               >
                 <Trash2 className="w-4 h-4" />
                 Delete Selected
@@ -143,12 +143,12 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
           
           <div className="flex gap-2 items-center">
             {photos.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={isAllSelected ? clearSelection : selectAllPhotos}
-                className="flex items-center gap-2"
-              >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={isAllSelected ? clearSelection : selectAllPhotos}
+              className="flex items-center gap-2 glass border-0 hover:bg-background/20"
+            >
                 {isAllSelected ? (
                   <CheckSquare className="w-4 h-4" />
                 ) : (
@@ -173,6 +173,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
               variant="ghost"
               size="sm"
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              className="glass border-0 hover:bg-background/20"
             >
               {sortOrder === 'asc' ? '↑' : '↓'}
             </Button>
@@ -197,16 +198,16 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-             {photos.map((photo) => (
-               <div key={photo.id} className="group relative">
-                 <Card className="overflow-hidden">
+              {photos.map((photo) => (
+                <div key={photo.id} className="group relative">
+                  <Card className="glass-card overflow-hidden border-0">
                    {/* Selection Checkbox */}
                    <div className="absolute top-2 left-2 z-10">
-                     <Checkbox
-                       checked={selectedPhotos.has(photo.id)}
-                       onCheckedChange={() => togglePhotoSelection(photo.id)}
-                       className="bg-white/80 border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                     />
+                      <Checkbox
+                        checked={selectedPhotos.has(photo.id)}
+                        onCheckedChange={() => togglePhotoSelection(photo.id)}
+                        className="glass border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                      />
                    </div>
                    
                    <div className="aspect-square relative">
@@ -223,25 +224,25 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
                        </div>
                      )}
                     
-                    {/* Overlay with actions */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => downloadPhoto(photo)}
-                        className="bg-white/20 hover:bg-white/30 text-white border-white/20"
-                      >
-                        <Download className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeletePhoto(photo)}
-                        className="bg-red-500/80 hover:bg-red-500 text-white"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                     {/* Overlay with actions */}
+                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                       <Button
+                         size="sm"
+                         variant="ghost"
+                         onClick={() => downloadPhoto(photo)}
+                         className="glass text-white border-0 hover:bg-white/20"
+                       >
+                         <Download className="w-4 h-4" />
+                       </Button>
+                       <Button
+                         size="sm"
+                         variant="ghost"
+                         onClick={() => handleDeletePhoto(photo)}
+                         className="glass text-white border-0 hover:bg-destructive/20 hover:text-destructive"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </Button>
+                     </div>
                   </div>
                   
                   {/* Photo info */}
