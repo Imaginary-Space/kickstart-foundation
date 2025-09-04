@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      emails: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_email: string
+          recipient_name: string
+          sender_email: string
+          sender_name: string
+          sent_at: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_email: string
+          recipient_name: string
+          sender_email: string
+          sender_name: string
+          sent_at?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_email?: string
+          recipient_name?: string
+          sender_email?: string
+          sender_name?: string
+          sent_at?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           created_at: string
