@@ -318,6 +318,44 @@ export const usePhotoGallery = () => {
     setStorageUsed(calculateStorageUsed());
   }, [photos]);
 
+  // Set up realtime subscription for new photos
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'photos',
+          filter: `user_id=eq.${user.id}`
+        },
+        async (payload) => {
+          console.log('New photo inserted:', payload);
+          
+          // Get signed URL for the new photo
+          const { data: urlData } = await supabase.storage
+            .from('user-photos')
+            .createSignedUrl(payload.new.file_path, 3600);
+
+          const newPhoto = {
+            ...payload.new,
+            url: urlData?.signedUrl || null,
+          } as PhotoMetadata;
+
+          // Add the new photo to the beginning of the list
+          setPhotos(prev => [newPhoto, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   return {
     photos: filteredAndSortedPhotos,
     loading,
