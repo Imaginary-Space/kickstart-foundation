@@ -120,17 +120,7 @@ const Dashboard = () => {
 
         {/* Photo Gallery */}
         <PhotoGallery className="glass-card border-0 mb-8" />
-
-        {/* General File Upload */}
-        <div className="w-full mb-8">
-          <FileDropZone
-            onFiles={handleGeneralFiles}
-            isProcessing={fileLoading}
-          />
-        </div>
-
-        {/* File Gallery */}
-        <FileGallery className="glass-card border-0" />
+        
       </div>
 
   
