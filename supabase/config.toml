@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.ai-photo-rename]
 verify_jwt = true
+
+[functions.log-error]
+verify_jwt = false

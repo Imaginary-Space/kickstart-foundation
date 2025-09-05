@@ -62,6 +62,54 @@ export type Database = {
         }
         Relationships: []
       }
+      error_logs: {
+        Row: {
+          created_at: string
+          error_details: Json | null
+          error_message: string
+          error_type: Database["public"]["Enums"]["error_type"]
+          file_info: Json | null
+          id: string
+          operation: string
+          resolved: boolean
+          severity: Database["public"]["Enums"]["error_severity"]
+          updated_at: string
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_details?: Json | null
+          error_message: string
+          error_type: Database["public"]["Enums"]["error_type"]
+          file_info?: Json | null
+          id?: string
+          operation: string
+          resolved?: boolean
+          severity?: Database["public"]["Enums"]["error_severity"]
+          updated_at?: string
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_details?: Json | null
+          error_message?: string
+          error_type?: Database["public"]["Enums"]["error_type"]
+          file_info?: Json | null
+          id?: string
+          operation?: string
+          resolved?: boolean
+          severity?: Database["public"]["Enums"]["error_severity"]
+          updated_at?: string
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           created_at: string
@@ -317,6 +365,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      error_severity: "low" | "medium" | "high" | "critical"
+      error_type:
+        | "upload_error"
+        | "processing_error"
+        | "ai_error"
+        | "system_error"
+        | "auth_error"
+        | "network_error"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -445,6 +501,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      error_severity: ["low", "medium", "high", "critical"],
+      error_type: [
+        "upload_error",
+        "processing_error",
+        "ai_error",
+        "system_error",
+        "auth_error",
+        "network_error",
+      ],
     },
   },
 } as const

@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { RenamePattern } from '@/types/photoRenamer';
 import { generateNewName } from '@/utils/fileNaming';
+import { errorLogger } from '@/utils/errorLogger';
 
 export interface PhotoMetadata {
   id: string;
@@ -84,6 +85,14 @@ export const usePhotoGallery = () => {
       return true;
     } catch (error) {
       console.error('Error uploading photo:', error);
+      
+      // Log the error
+      await errorLogger.logUploadError('photo_upload', error as Error, {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
+
       toast.error('Failed to upload photo');
       return false;
     } finally {
@@ -119,6 +128,13 @@ export const usePhotoGallery = () => {
       return true;
     } catch (error) {
       console.error('Error deleting photo:', error);
+      
+      // Log the error
+      await errorLogger.logProcessingError('photo_delete', error as Error, {
+        photoId,
+        filePath
+      });
+
       toast.error('Failed to delete photo');
       return false;
     } finally {
@@ -271,6 +287,12 @@ export const usePhotoGallery = () => {
 
     } catch (error) {
       console.error('Error renaming photo with AI:', error);
+      
+      // Log the error
+      await errorLogger.logAiError('ai_photo_rename', error as Error, {
+        photoId
+      });
+
       toast.error('Failed to rename photo with AI');
       return false;
     } finally {
@@ -315,6 +337,10 @@ export const usePhotoGallery = () => {
       setPhotos(photosWithUrls);
     } catch (error) {
       console.error('Error fetching photos:', error);
+      
+      // Log the error
+      await errorLogger.logProcessingError('photo_fetch', error as Error);
+
       toast.error('Failed to load photos');
     } finally {
       setLoading(false);

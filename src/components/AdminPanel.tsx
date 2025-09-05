@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Users } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
+import { ErrorLogsTable } from './ErrorLogsTable';
 
 type AppRole = Database['public']['Enums']['app_role'];
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -193,6 +194,9 @@ const AdminPanel = () => {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Error Logs Section */}
+      <ErrorLogsTable />
     </div>
   );
 };

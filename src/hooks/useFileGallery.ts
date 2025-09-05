@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { errorLogger } from '@/utils/errorLogger';
 
 export interface FileMetadata {
   id: string;
@@ -47,6 +48,14 @@ export const useFileGallery = () => {
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
+        
+        // Log the error
+        await errorLogger.logUploadError('file_upload', uploadError, {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        });
+
         toast.error('Failed to upload file');
         return false;
       }
@@ -65,6 +74,13 @@ export const useFileGallery = () => {
 
       if (dbError) {
         console.error('Database error:', dbError);
+        
+        // Log the error
+        await errorLogger.logProcessingError('file_metadata_save', dbError, {
+          fileName,
+          filePath
+        });
+
         // Try to clean up the uploaded file
         await supabase.storage.from('user-files').remove([filePath]);
         toast.error('Failed to save file metadata');
@@ -76,6 +92,14 @@ export const useFileGallery = () => {
       return true;
     } catch (error) {
       console.error('Error uploading file:', error);
+      
+      // Log the error
+      await errorLogger.logUploadError('file_upload_general', error as Error, {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
+
       toast.error('An error occurred while uploading');
       return false;
     } finally {
@@ -116,6 +140,13 @@ export const useFileGallery = () => {
       await fetchFiles(); // Refresh the files list
     } catch (error) {
       console.error('Error deleting file:', error);
+      
+      // Log the error
+      await errorLogger.logProcessingError('file_delete', error as Error, {
+        fileId,
+        filePath
+      });
+
       toast.error('An error occurred while deleting');
     } finally {
       setLoading(false);
