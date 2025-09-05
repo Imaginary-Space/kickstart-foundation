@@ -318,12 +318,12 @@ export const usePhotoGallery = () => {
     setStorageUsed(calculateStorageUsed());
   }, [photos]);
 
-  // Set up realtime subscription for new photos
+  // Set up realtime subscription for photos changes
   useEffect(() => {
     if (!user) return;
 
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel('photos-changes')
       .on(
         'postgres_changes',
         {
@@ -347,6 +347,48 @@ export const usePhotoGallery = () => {
 
           // Add the new photo to the beginning of the list
           setPhotos(prev => [newPhoto, ...prev]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'photos',
+          filter: `user_id=eq.${user.id}`
+        },
+        async (payload) => {
+          console.log('Photo updated:', payload);
+          
+          // Get signed URL for the updated photo
+          const { data: urlData } = await supabase.storage
+            .from('user-photos')
+            .createSignedUrl(payload.new.file_path, 3600);
+
+          const updatedPhoto = {
+            ...payload.new,
+            url: urlData?.signedUrl || null,
+          } as PhotoMetadata;
+
+          // Update the photo in the list
+          setPhotos(prev => prev.map(photo => 
+            photo.id === updatedPhoto.id ? updatedPhoto : photo
+          ));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'photos',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Photo deleted:', payload);
+          
+          // Remove the photo from the list
+          setPhotos(prev => prev.filter(photo => photo.id !== payload.old.id));
         }
       )
       .subscribe();
