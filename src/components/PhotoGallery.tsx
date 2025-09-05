@@ -224,25 +224,25 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
                       </div>
                     )}
                    
-                    {/* Overlay with actions */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-10">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => downloadPhoto(photo)}
-                        className="neon-border text-white hover:bg-white/20"
-                      >
-                        <Download className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeletePhoto(photo)}
-                        className="neon-border text-white hover:bg-destructive/20 hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                     {/* Overlay with actions */}
+                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-30 pointer-events-none group-hover:pointer-events-auto">
+                       <Button
+                         size="sm"
+                         variant="ghost"
+                         onClick={() => downloadPhoto(photo)}
+                         className="neon-border text-white hover:bg-white/20 relative z-40 pointer-events-auto"
+                       >
+                         <Download className="w-4 h-4" />
+                       </Button>
+                       <Button
+                         size="sm"
+                         variant="ghost"
+                         onClick={() => handleDeletePhoto(photo)}
+                         className="neon-border text-white hover:bg-destructive/20 hover:text-destructive relative z-40 pointer-events-auto"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </Button>
+                     </div>
                     
                     {/* Photo info overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10">
