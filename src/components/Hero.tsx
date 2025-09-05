@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { P5Background } from "@/components/P5Background";
+import { FileDropZone } from "@/components/PhotoRenamer/FileDropZone";
 import { useState } from "react";
 import { Mail, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +63,21 @@ export const Hero = () => {
             Join our early access list and get notified when we launch.
           </p>
           
+          {/* Demo FileDropZone */}
+          <div className="max-w-2xl mx-auto mb-8 animate-slide-up">
+            <FileDropZone
+              onFiles={() => {}}
+              isProcessing={false}
+              progress={0}
+              fileCount={0}
+              onSelectAll={() => {}}
+              onDeselectAll={() => {}}
+              onClearAll={() => {}}
+              previewMode="grid"
+              onPreviewModeChange={() => {}}
+            />
+          </div>
+
           {!isSubmitted ? (
             <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto animate-slide-up">
               <div className="flex flex-col sm:flex-row gap-3 mb-4">
