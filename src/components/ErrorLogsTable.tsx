@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, AlertCircle, TestTube } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorLogger } from '@/hooks/useErrorLogger';
 
 interface ErrorLog {
   id: string;
@@ -29,6 +30,7 @@ interface ErrorLog {
 export const ErrorLogsTable: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { logSystemError, logUploadError, logAiError, logProcessingError, logNetworkError } = useErrorLogger();
   const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({
@@ -100,6 +102,36 @@ export const ErrorLogsTable: React.FC = () => {
       toast({
         title: "Error",
         description: "Failed to mark error as resolved",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const runErrorTest = async () => {
+    try {
+      // Test different error types
+      await logSystemError('test_system_error', 'Test system error from admin panel', { testMode: true });
+      await logUploadError('test_upload_error', 'Test upload error from admin panel', { 
+        name: 'test.jpg', 
+        size: 1024, 
+        type: 'image/jpeg' 
+      });
+      await logAiError('test_ai_error', 'Test AI error from admin panel', { model: 'test', prompt: 'test prompt' });
+      await logProcessingError('test_processing_error', 'Test processing error from admin panel');
+      await logNetworkError('test_network_error', 'Test network error from admin panel');
+
+      toast({
+        title: "Test Completed",
+        description: "Successfully logged 5 test errors",
+      });
+
+      // Refresh the logs to show the new test errors
+      fetchErrorLogs();
+    } catch (error) {
+      console.error('Error running test:', error);
+      toast({
+        title: "Test Failed",
+        description: "Failed to log test errors",
         variant: "destructive",
       });
     }
@@ -220,6 +252,19 @@ export const ErrorLogsTable: React.FC = () => {
               <SelectItem value="true">Resolved</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Test Section */}
+        <div className="flex justify-end mb-4">
+          <Button 
+            onClick={runErrorTest}
+            variant="ghost"
+            size="sm"
+            className="gap-2"
+          >
+            <TestTube className="w-4 h-4" />
+            Test Error Logging
+          </Button>
         </div>
 
         {errorLogs.length === 0 ? (
