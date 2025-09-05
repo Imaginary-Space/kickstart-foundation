@@ -11,6 +11,7 @@ import { usePhotoGallery, PhotoMetadata } from '@/hooks/usePhotoGallery';
 import { formatFileSize } from '@/utils/fileProcessing';
 import { format } from 'date-fns';
 import BatchRenameDialog from './BatchRenameDialog';
+import { GlareCard } from '@/components/ui/glare-card';
 
 interface PhotoGalleryProps {
   className?: string;
@@ -200,73 +201,71 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {photos.map((photo) => (
                 <div key={photo.id} className="group relative">
-                  <Card className="glass-card overflow-hidden border-0">
-                   {/* Selection Checkbox */}
-                   <div className="absolute top-2 left-2 z-10">
-                      <Checkbox
-                        checked={selectedPhotos.has(photo.id)}
-                        onCheckedChange={() => togglePhotoSelection(photo.id)}
-                        className="glass border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  {/* Selection Checkbox */}
+                  <div className="absolute top-4 left-4 z-20">
+                    <Checkbox
+                      checked={selectedPhotos.has(photo.id)}
+                      onCheckedChange={() => togglePhotoSelection(photo.id)}
+                      className="glass border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    />
+                  </div>
+                  
+                  <GlareCard className="relative overflow-hidden aspect-square">
+                    {photo.url ? (
+                      <img
+                        src={photo.url}
+                        alt={photo.original_name}
+                        className="w-full h-full absolute inset-0 object-cover"
+                        loading="lazy"
                       />
-                   </div>
+                    ) : (
+                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                        <FileText className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    )}
                    
-                   <div className="aspect-square relative">
-                     {photo.url ? (
-                       <img
-                         src={photo.url}
-                         alt={photo.original_name}
-                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                         loading="lazy"
-                       />
-                     ) : (
-                       <div className="w-full h-full bg-muted flex items-center justify-center">
-                         <FileText className="w-8 h-8 text-muted-foreground" />
-                       </div>
-                     )}
+                    {/* Overlay with actions */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-10">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => downloadPhoto(photo)}
+                        className="neon-border text-white hover:bg-white/20"
+                      >
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeletePhoto(photo)}
+                        className="neon-border text-white hover:bg-destructive/20 hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                     
-                     {/* Overlay with actions */}
-                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                       <Button
-                         size="sm"
-                         variant="ghost"
-                         onClick={() => downloadPhoto(photo)}
-                         className="glass text-white border-0 hover:bg-white/20"
-                       >
-                         <Download className="w-4 h-4" />
-                       </Button>
-                       <Button
-                         size="sm"
-                         variant="ghost"
-                         onClick={() => handleDeletePhoto(photo)}
-                         className="glass text-white border-0 hover:bg-destructive/20 hover:text-destructive"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </Button>
-                     </div>
-                   </div>
-                   
-                   {/* Photo info */}
-                   <div className="p-3 glass border-0">
-                     <h4 className="font-medium text-sm truncate mb-2" title={photo.original_name}>
-                       {photo.original_name}
-                     </h4>
-                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                       <div className="flex items-center gap-1">
-                         <HardDrive className="w-3 h-3" />
-                         {formatFileSize(photo.file_size)}
-                       </div>
-                       <div className="flex items-center gap-1">
-                         <Calendar className="w-3 h-3" />
-                         {format(new Date(photo.created_at), 'MMM d')}
-                       </div>
-                     </div>
-                     {photo.width && photo.height && (
-                       <div className="text-xs text-muted-foreground mt-1">
-                         {photo.width} × {photo.height}
-                       </div>
-                     )}
-                   </div>
-                 </Card>
+                    {/* Photo info overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <h4 className="font-medium text-sm text-white truncate mb-1" title={photo.original_name}>
+                        {photo.original_name}
+                      </h4>
+                      <div className="flex items-center justify-between text-xs text-white/80">
+                        <div className="flex items-center gap-1">
+                          <HardDrive className="w-3 h-3" />
+                          {formatFileSize(photo.file_size)}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {format(new Date(photo.created_at), 'MMM d')}
+                        </div>
+                      </div>
+                      {photo.width && photo.height && (
+                        <div className="text-xs text-white/60 mt-1">
+                          {photo.width} × {photo.height}
+                        </div>
+                      )}
+                    </div>
+                  </GlareCard>
               </div>
             ))}
           </div>
