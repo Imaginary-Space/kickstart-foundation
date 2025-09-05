@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import type { RenamePattern } from '@/types/photoRenamer';
 import { generateNewName } from '@/utils/fileNaming';
 import { errorLogger } from '@/utils/errorLogger';
+import { usePostHog } from 'posthog-js/react';
 
 export interface PhotoMetadata {
   id: string;
@@ -22,6 +23,7 @@ export interface PhotoMetadata {
 
 export const usePhotoGallery = () => {
   const { user } = useAuth();
+  const posthog = usePostHog();
   const [photos, setPhotos] = useState<PhotoMetadata[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,11 +82,31 @@ export const usePhotoGallery = () => {
         throw dbError;
       }
 
+      // Track successful photo upload with PostHog
+      posthog.capture('photo_uploaded', {
+        file_name: file.name,
+        file_size: file.size,
+        file_type: file.type,
+        image_dimensions: `${dimensions.width}x${dimensions.height}`,
+        user_id: user.id,
+        timestamp: new Date().toISOString()
+      });
+
       toast.success('Photo uploaded successfully');
       await fetchPhotos(); // Refresh the gallery
       return true;
     } catch (error) {
       console.error('Error uploading photo:', error);
+      
+      // Track failed photo upload with PostHog
+      posthog.capture('photo_upload_failed', {
+        file_name: file.name,
+        file_size: file.size,
+        file_type: file.type,
+        error_message: error instanceof Error ? error.message : 'Unknown error',
+        user_id: user?.id,
+        timestamp: new Date().toISOString()
+      });
       
       // Log the error
       await errorLogger.logUploadError('photo_upload', error as Error, {
