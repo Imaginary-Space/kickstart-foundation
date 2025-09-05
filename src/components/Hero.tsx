@@ -55,7 +55,7 @@ export const Hero = () => {
       <div className="relative z-10 container mx-auto px-6 text-center">
         <div className="max-w-4xl mx-auto animate-fade-in">
           <h1 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent px-0 md:text-7xl">
-            Coming Soon: AI-Powered Photo Organization
+            AI-Powered Photo Organization
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-muted-foreground max-w-2xl mx-auto">
             Be the first to transform messy photo filenames into organized, descriptive names using AI. 
