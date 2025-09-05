@@ -53,8 +53,8 @@ export const Hero = () => {
       
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 text-center">
-        <div className="max-w-4xl mx-auto animate-fade-in">
-          <h1 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent px-0 md:text-7xl">
+        <div className="max-w-5xl mx-auto animate-fade-in">
+          <h1 className="text-5xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent px-0 md:text-7xl">
             AI-Powered Photo Organization
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-muted-foreground max-w-2xl mx-auto">
