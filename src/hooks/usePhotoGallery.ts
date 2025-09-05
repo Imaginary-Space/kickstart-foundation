@@ -231,6 +231,53 @@ export const usePhotoGallery = () => {
     }
   };
 
+  const aiRenamePhoto = async (photoId: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      
+      // Get signed URL for the photo
+      const photo = photos.find(p => p.id === photoId);
+      if (!photo) {
+        throw new Error('Photo not found');
+      }
+
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from('user-photos')
+        .createSignedUrl(photo.file_path, 300); // 5 minute expiry
+
+      if (urlError || !signedUrlData?.signedUrl) {
+        throw new Error('Failed to generate signed URL');
+      }
+
+      // Call the AI rename edge function
+      const { data, error } = await supabase.functions.invoke('ai-photo-rename', {
+        body: {
+          photoId,
+          signedUrl: signedUrlData.signedUrl
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to rename photo');
+      }
+
+      if (!data?.success) {
+        throw new Error(data?.error || 'AI renaming failed');
+      }
+
+      toast.success('Photo renamed with AI successfully');
+      // Refresh will happen automatically via real-time subscription
+      return true;
+
+    } catch (error) {
+      console.error('Error renaming photo with AI:', error);
+      toast.error('Failed to rename photo with AI');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const calculateStorageUsed = () => {
     return photos.reduce((total, photo) => total + photo.file_size, 0);
   };
@@ -418,5 +465,6 @@ export const usePhotoGallery = () => {
     selectAllPhotos,
     clearSelection,
     deleteSelectedPhotos,
+    aiRenamePhoto,
   };
 };

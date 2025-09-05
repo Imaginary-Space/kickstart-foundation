@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X } from 'lucide-react';
+import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles } from 'lucide-react';
 import { usePhotoGallery, PhotoMetadata } from '@/hooks/usePhotoGallery';
 import { formatFileSize } from '@/utils/fileProcessing';
 import { format } from 'date-fns';
@@ -36,6 +36,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
     selectAllPhotos,
     clearSelection,
     deleteSelectedPhotos,
+    aiRenamePhoto,
   } = usePhotoGallery();
 
   const selectedPhotosList = photos.filter(photo => selectedPhotos.has(photo.id));
@@ -224,25 +225,34 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
                       </div>
                     )}
                    
-                     {/* Overlay with actions */}
-                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-30 pointer-events-none group-hover:pointer-events-auto">
-                       <Button
-                         size="sm"
-                         variant="ghost"
-                         onClick={() => downloadPhoto(photo)}
-                         className="neon-border text-white hover:bg-white/20 relative z-40 pointer-events-auto"
-                       >
-                         <Download className="w-4 h-4" />
-                       </Button>
-                       <Button
-                         size="sm"
-                         variant="ghost"
-                         onClick={() => handleDeletePhoto(photo)}
-                         className="neon-border text-white hover:bg-destructive/20 hover:text-destructive relative z-40 pointer-events-auto"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </Button>
-                     </div>
+                      {/* Overlay with actions */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-30 pointer-events-none group-hover:pointer-events-auto">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => aiRenamePhoto(photo.id)}
+                          disabled={loading}
+                          className="neon-border text-white hover:bg-white/20 relative z-40 pointer-events-auto"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => downloadPhoto(photo)}
+                          className="neon-border text-white hover:bg-white/20 relative z-40 pointer-events-auto"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeletePhoto(photo)}
+                          className="neon-border text-white hover:bg-destructive/20 hover:text-destructive relative z-40 pointer-events-auto"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     
                     {/* Photo info overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10">
