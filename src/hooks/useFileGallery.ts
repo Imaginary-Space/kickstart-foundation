@@ -5,15 +5,14 @@ import { toast } from 'sonner';
 
 export interface FileMetadata {
   id: string;
-  name: string;
-  bucket_id?: string;
-  owner?: string;
+  user_id: string;
+  original_name: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  mime_type: string;
   created_at: string;
   updated_at: string;
-  last_accessed_at?: string | null;
-  metadata?: Record<string, any> | null;
-  size?: number;
-  mimetype?: string | null;
   url?: string;
 }
 
@@ -52,6 +51,26 @@ export const useFileGallery = () => {
         return false;
       }
 
+      // Save metadata to database
+      const { error: dbError } = await supabase
+        .from('files')
+        .insert({
+          user_id: user.id,
+          original_name: file.name,
+          file_name: fileName,
+          file_path: filePath,
+          file_size: file.size,
+          mime_type: file.type || 'application/octet-stream',
+        });
+
+      if (dbError) {
+        console.error('Database error:', dbError);
+        // Try to clean up the uploaded file
+        await supabase.storage.from('user-files').remove([filePath]);
+        toast.error('Failed to save file metadata');
+        return false;
+      }
+
       toast.success('File uploaded successfully');
       await fetchFiles(); // Refresh the files list
       return true;
@@ -64,19 +83,32 @@ export const useFileGallery = () => {
     }
   };
 
-  const deleteFile = async (filePath: string) => {
+  const deleteFile = async (fileId: string, filePath: string) => {
     if (!user) return;
 
     try {
       setLoading(true);
       
-      const { error } = await supabase.storage
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
         .from('user-files')
         .remove([filePath]);
 
-      if (error) {
-        console.error('Delete error:', error);
-        toast.error('Failed to delete file');
+      if (storageError) {
+        console.error('Storage delete error:', storageError);
+        toast.error('Failed to delete file from storage');
+        return;
+      }
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('files')
+        .delete()
+        .eq('id', fileId);
+
+      if (dbError) {
+        console.error('Database delete error:', dbError);
+        toast.error('Failed to delete file metadata');
         return;
       }
 
@@ -90,20 +122,20 @@ export const useFileGallery = () => {
     }
   };
 
-  const toggleFileSelection = (fileName: string) => {
+  const toggleFileSelection = (fileId: string) => {
     setSelectedFiles(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(fileName)) {
-        newSet.delete(fileName);
+      if (newSet.has(fileId)) {
+        newSet.delete(fileId);
       } else {
-        newSet.add(fileName);
+        newSet.add(fileId);
       }
       return newSet;
     });
   };
 
   const selectAllFiles = () => {
-    setSelectedFiles(new Set(filteredAndSortedFiles.map(file => file.name)));
+    setSelectedFiles(new Set(filteredAndSortedFiles.map(file => file.id)));
   };
 
   const clearSelection = () => {
@@ -117,18 +149,31 @@ export const useFileGallery = () => {
       return;
     }
 
-    const filesToDelete = files.filter(file => selectedFiles.has(file.name));
+    const filesToDelete = files.filter(file => selectedFiles.has(file.id));
     
     try {
       setLoading(true);
       
-      const { error } = await supabase.storage
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
         .from('user-files')
-        .remove(filesToDelete.map(file => file.name));
+        .remove(filesToDelete.map(file => file.file_path));
 
-      if (error) {
-        console.error('Batch delete error:', error);
-        toast.error('Failed to delete some files');
+      if (storageError) {
+        console.error('Batch storage delete error:', storageError);
+        toast.error('Failed to delete some files from storage');
+        return;
+      }
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('files')
+        .delete()
+        .in('id', filesToDelete.map(file => file.id));
+
+      if (dbError) {
+        console.error('Batch database delete error:', dbError);
+        toast.error('Failed to delete file metadata');
         return;
       }
 
@@ -144,7 +189,7 @@ export const useFileGallery = () => {
   };
 
   const calculateStorageUsed = () => {
-    return files.reduce((total, file) => total + (file.size || 0), 0);
+    return files.reduce((total, file) => total + (file.file_size || 0), 0);
   };
 
   const fetchFiles = async () => {
@@ -153,12 +198,11 @@ export const useFileGallery = () => {
     try {
       setLoading(true);
       
-      const { data: fileList, error } = await supabase.storage
-        .from('user-files')
-        .list(user.id, {
-          limit: 100,
-          offset: 0
-        });
+      const { data: fileList, error } = await supabase
+        .from('files')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching files:', error);
@@ -169,11 +213,9 @@ export const useFileGallery = () => {
       // Generate signed URLs for each file
       const filesWithUrls = await Promise.all(
         (fileList || []).map(async (file) => {
-          const filePath = `${user.id}/${file.name}`;
-          
           const { data } = supabase.storage
             .from('user-files')
-            .getPublicUrl(filePath);
+            .getPublicUrl(file.file_path);
 
           return {
             ...file,
@@ -194,20 +236,20 @@ export const useFileGallery = () => {
   // Filter and sort files
   const filteredAndSortedFiles = files
     .filter(file => 
-      file.name.toLowerCase().includes(searchTerm.toLowerCase())
+      file.original_name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       let comparison = 0;
       
       switch (sortBy) {
         case 'name':
-          comparison = a.name.localeCompare(b.name);
+          comparison = a.original_name.localeCompare(b.original_name);
           break;
         case 'date':
           comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           break;
         case 'size':
-          comparison = (a.size || 0) - (b.size || 0);
+          comparison = (a.file_size || 0) - (b.file_size || 0);
           break;
       }
       

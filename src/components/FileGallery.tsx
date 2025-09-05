@@ -35,13 +35,13 @@ const FileGallery: React.FC<FileGalleryProps> = ({ className }) => {
     deleteSelectedFiles,
   } = useFileGallery();
 
-  const selectedFilesList = files.filter(file => selectedFiles.has(file.name));
+  const selectedFilesList = files.filter(file => selectedFiles.has(file.id));
   const isAllSelected = files.length > 0 && selectedFiles.size === files.length;
   const isSomeSelected = selectedFiles.size > 0;
 
   const handleDeleteFile = async (file: FileMetadata) => {
-    if (window.confirm(`Are you sure you want to delete "${file.name}"?`)) {
-      await deleteFile(file.name);
+    if (window.confirm(`Are you sure you want to delete "${file.original_name}"?`)) {
+      await deleteFile(file.id, file.file_path);
     }
   };
 
@@ -54,7 +54,7 @@ const FileGallery: React.FC<FileGalleryProps> = ({ className }) => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = file.name;
+      link.download = file.original_name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -72,26 +72,26 @@ const FileGallery: React.FC<FileGalleryProps> = ({ className }) => {
     return formatFileSize(bytes);
   };
 
-  const getFileIcon = (mimetype: string | null, size: number = 24) => {
-    if (!mimetype) return <File size={size} />;
+  const getFileIcon = (mimeType: string | null, size: number = 24) => {
+    if (!mimeType) return <File size={size} />;
     
-    if (mimetype.startsWith('image/')) return <FileImage size={size} />;
-    if (mimetype.startsWith('video/')) return <FileVideo size={size} />;
-    if (mimetype.startsWith('audio/')) return <Music size={size} />;
-    if (mimetype.includes('zip') || mimetype.includes('rar') || mimetype.includes('tar')) return <Archive size={size} />;
+    if (mimeType.startsWith('image/')) return <FileImage size={size} />;
+    if (mimeType.startsWith('video/')) return <FileVideo size={size} />;
+    if (mimeType.startsWith('audio/')) return <Music size={size} />;
+    if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('tar')) return <Archive size={size} />;
     
     return <FileText size={size} />;
   };
 
-  const getFileTypeColor = (mimetype: string | null) => {
-    if (!mimetype) return 'bg-secondary';
+  const getFileTypeColor = (mimeType: string | null) => {
+    if (!mimeType) return 'bg-secondary';
     
-    if (mimetype.startsWith('image/')) return 'bg-green-500';
-    if (mimetype.startsWith('video/')) return 'bg-red-500';
-    if (mimetype.startsWith('audio/')) return 'bg-purple-500';
-    if (mimetype.includes('pdf')) return 'bg-red-600';
-    if (mimetype.includes('document') || mimetype.includes('word')) return 'bg-blue-500';
-    if (mimetype.includes('spreadsheet') || mimetype.includes('excel')) return 'bg-green-600';
+    if (mimeType.startsWith('image/')) return 'bg-green-500';
+    if (mimeType.startsWith('video/')) return 'bg-red-500';
+    if (mimeType.startsWith('audio/')) return 'bg-purple-500';
+    if (mimeType.includes('pdf')) return 'bg-red-600';
+    if (mimeType.includes('document') || mimeType.includes('word')) return 'bg-blue-500';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'bg-green-600';
     
     return 'bg-gray-500';
   };
@@ -209,31 +209,31 @@ const FileGallery: React.FC<FileGalleryProps> = ({ className }) => {
         {!loading && files.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {files.map((file) => (
-              <GlareCard key={file.name} className="relative group">
+              <GlareCard key={file.id} className="relative group">
                 <div className="relative h-48 bg-card border rounded-lg overflow-hidden">
                   {/* Selection Checkbox */}
                   <div className="absolute top-2 left-2 z-10">
                     <Checkbox
-                      checked={selectedFiles.has(file.name)}
-                      onCheckedChange={() => toggleFileSelection(file.name)}
+                      checked={selectedFiles.has(file.id)}
+                      onCheckedChange={() => toggleFileSelection(file.id)}
                       className="bg-background/80 backdrop-blur-sm border-2"
                     />
                   </div>
 
                   {/* File Icon/Preview */}
                   <div className="flex items-center justify-center h-32 bg-muted/50">
-                    <div className={`p-4 rounded-full ${getFileTypeColor(file.mimetype)} text-white`}>
-                      {getFileIcon(file.mimetype, 32)}
+                    <div className={`p-4 rounded-full ${getFileTypeColor(file.mime_type)} text-white`}>
+                      {getFileIcon(file.mime_type, 32)}
                     </div>
                   </div>
 
                   {/* File Info */}
                   <div className="p-3 space-y-1">
-                    <h3 className="font-medium text-sm truncate" title={file.name}>
-                      {file.name}
+                    <h3 className="font-medium text-sm truncate" title={file.original_name}>
+                      {file.original_name}
                     </h3>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{formatFileSize(file.size || 0)}</span>
+                      <span>{formatFileSize(file.file_size || 0)}</span>
                       <span>{format(new Date(file.created_at), 'MMM d')}</span>
                     </div>
                   </div>
