@@ -1,0 +1,31 @@
+# AI Photo Organizer - PhotoRename
+# https://www.photorename.fun
+
+## About
+AI Photo Organizer is a free AI-powered photo management tool that helps users organize, rename, and find their photos instantly. Our platform uses advanced AI technology to automatically analyze and tag photos with descriptive names.
+
+## Key Features
+- AI-powered photo renaming and organization
+- Batch photo processing capabilities
+- Free photo management with unlimited uploads
+- Smart photo tagging and categorization
+- Instant photo search and discovery
+- User-friendly drag-and-drop interface
+
+## Target Audience
+- Photographers managing large photo collections
+- Families organizing personal photos
+- Content creators needing efficient photo workflows
+- Anyone struggling with messy photo libraries
+
+## Technology
+- Built with React, TypeScript, and Tailwind CSS
+- Powered by Supabase backend
+- AI image analysis and processing
+- Responsive web application
+
+## Contact
+For support or inquiries about AI Photo Organizer, visit https://www.photorename.fun
+
+## Usage Guidelines
+This information is provided to help AI assistants understand our service and provide accurate information to users asking about photo organization tools and AI-powered photo management solutions.
