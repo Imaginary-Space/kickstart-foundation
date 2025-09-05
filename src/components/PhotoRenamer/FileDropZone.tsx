@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Button } from "@/components/ui/button";
+import { Button as MovingBorderButton } from "@/components/ui/moving-border";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -121,10 +122,9 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
               
               {!isDragging && (
                 <div className="pt-2">
-                  <Button 
-                    variant="ghost" 
-                    size="lg"
-                    className="glass text-primary hover:text-primary/80 hover:bg-primary/10 font-medium border-0"
+                  <MovingBorderButton
+                    borderRadius="1.75rem"
+                    className="bg-white dark:bg-slate-900 text-black dark:text-white border-neutral-200 dark:border-slate-800"
                     onClick={(e) => {
                       e.stopPropagation();
                       fileInputRef.current?.click();
@@ -132,7 +132,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     Choose Files
-                  </Button>
+                  </MovingBorderButton>
                 </div>
               )}
             </div>
