@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, CheckCircle, Clock, AlertCircle, TestTube } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, AlertCircle, TestTube, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorLogger } from '@/hooks/useErrorLogger';
 
@@ -132,6 +132,31 @@ export const ErrorLogsTable: React.FC = () => {
       toast({
         title: "Test Failed",
         description: "Failed to log test errors",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteErrorLog = async (logId: string) => {
+    try {
+      const { error } = await supabase
+        .from('error_logs')
+        .delete()
+        .eq('id', logId);
+
+      if (error) throw error;
+
+      setErrorLogs(prev => prev.filter(log => log.id !== logId));
+
+      toast({
+        title: "Success",
+        description: "Error log deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting log:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete error log",
         variant: "destructive",
       });
     }
@@ -320,15 +345,25 @@ export const ErrorLogsTable: React.FC = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {!log.resolved && (
+                      <div className="flex gap-2">
+                        {!log.resolved && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => markAsResolved(log.id)}
+                          >
+                            Mark Resolved
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => markAsResolved(log.id)}
+                          onClick={() => deleteErrorLog(log.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
-                          Mark Resolved
+                          <Trash2 className="w-4 h-4" />
                         </Button>
-                      )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
