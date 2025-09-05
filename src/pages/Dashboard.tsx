@@ -4,24 +4,34 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User, Shield } from "lucide-react";
-import { FileDropZone } from "@/components/PhotoRenamer/FileDropZone";
+import { FileDropZone as PhotoFileDropZone } from "@/components/PhotoRenamer/FileDropZone";
 import { usePhotoRenamer } from "@/hooks/usePhotoRenamer";
 import { usePhotoGallery } from "@/hooks/usePhotoGallery";
+import { useFileGallery } from "@/hooks/useFileGallery";
 import { useUserRole } from "@/hooks/useUserRole";
 import PhotoGallery from "@/components/PhotoGallery";
+import FileGallery from "@/components/FileGallery";
+import FileDropZone from "@/components/FileDropZone";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { isAdmin, roles, loading: roleLoading } = useUserRole();
   
-  const { uploadPhoto, loading } = usePhotoGallery();
+  const { uploadPhoto, loading: photoLoading } = usePhotoGallery();
+  const { uploadFile, loading: fileLoading } = useFileGallery();
 
-  const handleFiles = async (files: File[]) => {
+  const handlePhotoFiles = async (files: File[]) => {
     for (const file of files) {
       if (file.type.startsWith('image/')) {
         await uploadPhoto(file);
       }
+    }
+  };
+
+  const handleGeneralFiles = async (files: File[]) => {
+    for (const file of files) {
+      await uploadFile(file);
     }
   };
 
@@ -95,9 +105,9 @@ const Dashboard = () => {
 
         {/* Photo Upload */}
         <div className="w-full mb-8">
-          <FileDropZone
-            onFiles={handleFiles}
-            isProcessing={loading}
+          <PhotoFileDropZone
+            onFiles={handlePhotoFiles}
+            isProcessing={photoLoading}
             progress={0}
             fileCount={0}
             onSelectAll={noOpFunction}
@@ -109,7 +119,18 @@ const Dashboard = () => {
         </div>
 
         {/* Photo Gallery */}
-        <PhotoGallery className="glass-card border-0" />
+        <PhotoGallery className="glass-card border-0 mb-8" />
+
+        {/* General File Upload */}
+        <div className="w-full mb-8">
+          <FileDropZone
+            onFiles={handleGeneralFiles}
+            isProcessing={fileLoading}
+          />
+        </div>
+
+        {/* File Gallery */}
+        <FileGallery className="glass-card border-0" />
       </div>
 
   
