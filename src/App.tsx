@@ -13,6 +13,7 @@ import Styleguide from "./pages/Styleguide";
 
 import TestimonialsPage from "./pages/Testimonials";
 import NotFound from "./pages/NotFound";
+import AdminPanel from "./components/AdminPanel";
 
 const queryClient = new QueryClient();
 
@@ -37,7 +38,11 @@ const App = () => (
             } />
             <Route path="/login" element={<Login />} />
             <Route path="/styleguide" element={<Styleguide />} />
-            
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminPanel />
+              </ProtectedRoute>
+            } />
             <Route path="/testimonials" element={<TestimonialsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

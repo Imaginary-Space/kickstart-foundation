@@ -1,16 +1,19 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Shield } from "lucide-react";
 import { FileDropZone } from "@/components/PhotoRenamer/FileDropZone";
 import { usePhotoRenamer } from "@/hooks/usePhotoRenamer";
 import { usePhotoGallery } from "@/hooks/usePhotoGallery";
+import { useUserRole } from "@/hooks/useUserRole";
 import PhotoGallery from "@/components/PhotoGallery";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { isAdmin, roles, loading: roleLoading } = useUserRole();
   
   const { uploadPhoto, loading } = usePhotoGallery();
 
@@ -47,18 +50,46 @@ const Dashboard = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold">Dashboard</h1>
-                <p className="text-muted-foreground">Bienvenido, {user?.email}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-muted-foreground">Bienvenido, {user?.email}</p>
+                  {!roleLoading && roles.length > 0 && (
+                    <div className="flex gap-1">
+                      {roles.map(role => (
+                        <Badge 
+                          key={role} 
+                          variant={role === 'admin' ? 'destructive' : role === 'moderator' ? 'secondary' : 'outline'}
+                          className="text-xs"
+                        >
+                          {role}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             
-            <Button 
-              variant="ghost" 
-              onClick={handleSignOut}
-              className="glass flex items-center gap-2 hover:bg-background/20"
-            >
-              <LogOut className="w-4 h-4" />
-              Cerrar Sesión
-            </Button>
+            <div className="flex items-center gap-2">
+              {isAdmin() && (
+                <Button 
+                  variant="default" 
+                  onClick={() => navigate('/admin')}
+                  className="glass flex items-center gap-2 hover:bg-background/20"
+                >
+                  <Shield className="w-4 h-4" />
+                  Admin Panel
+                </Button>
+              )}
+              
+              <Button 
+                variant="ghost" 
+                onClick={handleSignOut}
+                className="glass flex items-center gap-2 hover:bg-background/20"
+              >
+                <LogOut className="w-4 h-4" />
+                Cerrar Sesión
+              </Button>
+            </div>
           </div>
         </div>
 
