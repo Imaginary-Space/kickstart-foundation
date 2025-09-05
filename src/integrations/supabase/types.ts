@@ -164,6 +164,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sweets: {
+        Row: {
+          calories: number | null
+          created_at: string | null
+          id: number
+          is_available: boolean | null
+          name: string
+          price: number
+          type: string
+        }
+        Insert: {
+          calories?: number | null
+          created_at?: string | null
+          id?: never
+          is_available?: boolean | null
+          name: string
+          price: number
+          type: string
+        }
+        Update: {
+          calories?: number | null
+          created_at?: string | null
+          id?: never
+          is_available?: boolean | null
+          name?: string
+          price?: number
+          type?: string
+        }
+        Relationships: []
+      }
       todos: {
         Row: {
           completed: boolean
