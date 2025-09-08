@@ -199,81 +199,138 @@ async function processPhoto(
 
   console.log(`Analyzing photo: ${photo.file_name}`);
 
-  // Call OpenAI Vision API
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openaiApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `You are an AI photo analyst. Analyze the image and provide:
-1. A concise description (max 100 words)
-2. Relevant tags (max 10, comma-separated)
-3. An improved filename (descriptive but concise, keep original extension)
-
-Respond in JSON format: {"description": "...", "tags": "tag1,tag2,tag3", "filename": "improved_name.jpg"}`
-        },
-        {
-          role: 'user',
-          content: [
-            { 
-              type: 'text', 
-              text: `Analyze this photo named "${photo.file_name}". Provide description, tags, and improved filename.`
-            },
-            { 
-              type: 'image_url', 
-              image_url: { url: signedUrlData.signedUrl }
-            }
-          ]
-        }
-      ],
-      max_completion_tokens: 300,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
-  }
-
-  const aiResponse = await response.json();
-  const content = aiResponse.choices[0].message.content;
-  
-  let analysisResult;
-  try {
-    analysisResult = JSON.parse(content);
-  } catch (parseError) {
-    console.error('Failed to parse AI response:', content);
-    throw new Error('Invalid AI response format');
-  }
-
-  const tags = analysisResult.tags ? analysisResult.tags.split(',').map((tag: string) => tag.trim()) : [];
-
-  // Update photo with AI analysis
   const updates: any = {
     analysis_completed_at: new Date().toISOString()
   };
 
-  if (analysisOptions.generateDescription && analysisResult.description) {
-    updates.ai_description = analysisResult.description;
+  let aiFilename = null;
+  let tags: string[] = [];
+  let description = null;
+
+  // AI-powered filename generation (focused approach)
+  if (analysisOptions.improveFilename) {
+    try {
+      const filenameResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Analyze this image and generate a descriptive filename. The filename should be concise (2-4 words), describe the main subject/content, and be suitable for a file system. Return ONLY the filename without extension, no explanation.'
+                },
+                {
+                  type: 'image_url',
+                  image_url: { url: signedUrlData.signedUrl }
+                }
+              ]
+            }
+          ],
+          max_completion_tokens: 50,
+        }),
+      });
+
+      if (filenameResponse.ok) {
+        const filenameResult = await filenameResponse.json();
+        const suggestedName = filenameResult.choices[0]?.message?.content?.trim();
+        
+        if (suggestedName) {
+          // Sanitize the filename
+          const sanitizedName = suggestedName
+            .replace(/[^a-zA-Z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .toLowerCase()
+            .substring(0, 50);
+
+          const originalExtension = photo.original_name.split('.').pop() || 'jpg';
+          aiFilename = `${sanitizedName}.${originalExtension}`;
+          updates.file_name = aiFilename;
+        }
+      }
+    } catch (error) {
+      console.error('AI filename generation error:', error);
+      // Continue with other analysis even if filename generation fails
+    }
   }
 
-  if (analysisOptions.generateTags && tags.length > 0) {
-    updates.ai_generated_tags = tags;
-  }
+  // Combined analysis for tags and descriptions
+  if (analysisOptions.generateTags || analysisOptions.generateDescription) {
+    try {
+      const analysisResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: `You are an AI photo analyst. Analyze the image and provide:
+${analysisOptions.generateDescription ? '1. A concise description (max 100 words)' : ''}
+${analysisOptions.generateTags ? '2. Relevant tags (max 10, comma-separated)' : ''}
 
-  if (analysisOptions.improveFilename && analysisResult.filename) {
-    // Preserve original extension if not provided
-    const originalExt = photo.file_name.split('.').pop();
-    const newFilename = analysisResult.filename.includes('.') 
-      ? analysisResult.filename 
-      : `${analysisResult.filename}.${originalExt}`;
-    updates.file_name = newFilename;
+Respond in JSON format: ${JSON.stringify({
+  ...(analysisOptions.generateDescription && { description: "..." }),
+  ...(analysisOptions.generateTags && { tags: "tag1,tag2,tag3" })
+})}`
+            },
+            {
+              role: 'user',
+              content: [
+                { 
+                  type: 'text', 
+                  text: `Analyze this photo named "${photo.file_name}". ${analysisOptions.generateDescription ? 'Provide a description.' : ''} ${analysisOptions.generateTags ? 'Provide relevant tags.' : ''}`
+                },
+                { 
+                  type: 'image_url', 
+                  image_url: { url: signedUrlData.signedUrl }
+                }
+              ]
+            }
+          ],
+          max_completion_tokens: 300,
+        }),
+      });
+
+      if (analysisResponse.ok) {
+        const analysisResult = await analysisResponse.json();
+        const content = analysisResult.choices[0].message.content;
+        
+        let parsedAnalysis;
+        try {
+          parsedAnalysis = JSON.parse(content);
+        } catch (parseError) {
+          console.error('Failed to parse analysis response:', content);
+          // Continue without failing the entire process
+        }
+
+        if (parsedAnalysis) {
+          if (analysisOptions.generateDescription && parsedAnalysis.description) {
+            description = parsedAnalysis.description;
+            updates.ai_description = description;
+          }
+
+          if (analysisOptions.generateTags && parsedAnalysis.tags) {
+            tags = parsedAnalysis.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
+            if (tags.length > 0) {
+              updates.ai_generated_tags = tags;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('AI analysis error:', error);
+      // Continue without failing the entire process
+    }
   }
 
   // Update photo record
@@ -297,9 +354,9 @@ Respond in JSON format: {"description": "...", "tags": "tag1,tag2,tag3", "filena
   }
 
   return {
-    description: analysisResult.description,
+    aiFilename,
+    description,
     tags,
-    improvedFilename: analysisResult.filename,
     updatedFields: Object.keys(updates)
   };
 }

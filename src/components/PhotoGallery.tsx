@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles, RefreshCw, Bot } from 'lucide-react';
 import { BatchAnalysisDialog } from './BatchAnalysisDialog';
+import { useJobManager } from '@/hooks/useJobManager';
 import { usePhotoGalleryWithCache, PhotoMetadata } from '@/hooks/usePhotoGalleryWithCache';
 import { formatFileSize } from '@/utils/fileProcessing';
 import { format } from 'date-fns';
@@ -20,6 +21,7 @@ interface PhotoGalleryProps {
 
 const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
   const [showBatchAnalysisDialog, setShowBatchAnalysisDialog] = useState(false);
+  const { startBatchAnalysis, isStartingJob, hasActiveJob } = useJobManager();
   const {
     photos,
     loading,
@@ -130,6 +132,36 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
                 onRename={batchRenamePhotos}
                 isRenaming={isRenaming}
               />
+              <Button
+                onClick={() => setShowBatchAnalysisDialog(true)}
+                variant="ghost"
+                size="sm"
+                className="text-primary hover:text-primary/90 glass border-0 hover:bg-primary/10"
+              >
+                <Bot className="w-4 h-4" />
+                AI Analysis
+              </Button>
+              <Button
+                onClick={() => {
+                  // Start AI rename with only filename generation enabled
+                  const photoIds = selectedPhotosList.map(photo => photo.id);
+                  startBatchAnalysis({ 
+                    photoIds, 
+                    analysisOptions: {
+                      improveFilename: true,
+                      generateTags: false,
+                      generateDescription: false
+                    }
+                  });
+                }}
+                variant="ghost"
+                size="sm"
+                className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 glass border-0 hover:bg-purple-500/10"
+                disabled={isStartingJob || hasActiveJob}
+              >
+                <Sparkles className="w-4 h-4" />
+                {isStartingJob ? 'Starting...' : 'AI Rename'}
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"

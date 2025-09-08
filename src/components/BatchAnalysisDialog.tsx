@@ -29,9 +29,9 @@ export const BatchAnalysisDialog: React.FC<BatchAnalysisDialogProps> = ({
   const { startBatchAnalysis, activeJob, hasActiveJob, isStartingJob } = useJobManager();
   
   const [analysisOptions, setAnalysisOptions] = useState({
+    improveFilename: true, // Default to AI rename enabled
     generateTags: true,
     generateDescription: true,
-    improveFilename: true,
   });
 
   const handleStartAnalysis = () => {
@@ -143,9 +143,26 @@ export const BatchAnalysisDialog: React.FC<BatchAnalysisDialogProps> = ({
               <Separator />
               
               <div className="space-y-4">
-                <h3 className="font-medium">Analysis Options</h3>
+                <h3 className="font-medium">AI Analysis Options</h3>
                 
                 <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="improveFilename"
+                      checked={analysisOptions.improveFilename}
+                      onCheckedChange={(checked) =>
+                        setAnalysisOptions(prev => ({ ...prev, improveFilename: !!checked }))
+                      }
+                    />
+                    <Label htmlFor="improveFilename" className="flex items-center gap-2 cursor-pointer">
+                      <Sparkles className="w-4 h-4 text-purple-500" />
+                      AI Smart Rename
+                      <span className="text-sm text-muted-foreground">
+                        Generate intelligent, descriptive filenames
+                      </span>
+                    </Label>
+                  </div>
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="generateTags"
@@ -179,24 +196,21 @@ export const BatchAnalysisDialog: React.FC<BatchAnalysisDialogProps> = ({
                       </span>
                     </Label>
                   </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="improveFilename"
-                      checked={analysisOptions.improveFilename}
-                      onCheckedChange={(checked) =>
-                        setAnalysisOptions(prev => ({ ...prev, improveFilename: !!checked }))
-                      }
-                    />
-                    <Label htmlFor="improveFilename" className="flex items-center gap-2 cursor-pointer">
-                      <Sparkles className="w-4 h-4 text-purple-500" />
-                      Improve Filename
-                      <span className="text-sm text-muted-foreground">
-                        Generate descriptive filenames
-                      </span>
-                    </Label>
-                  </div>
                 </div>
+
+                {/* AI Rename Highlight */}
+                {analysisOptions.improveFilename && (
+                  <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+                    <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+                      <Sparkles className="w-4 h-4" />
+                      <span className="text-sm font-medium">AI Smart Rename Enabled</span>
+                    </div>
+                    <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                      Photos will be intelligently renamed based on their content using AI vision analysis. 
+                      This creates much better filenames than manual patterns!
+                    </p>
+                  </div>
+                )}
               </div>
             </>
           )}
