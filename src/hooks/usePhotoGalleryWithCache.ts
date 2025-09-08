@@ -355,16 +355,25 @@ export const usePhotoGalleryWithCache = () => {
 
   const aiRenamePhoto = async (photoId: string): Promise<boolean> => {
     try {
+      // First clear any stuck jobs
+      try {
+        await supabase.functions.invoke('clear-stuck-jobs');
+      } catch (clearError) {
+        console.warn('Failed to clear stuck jobs:', clearError);
+      }
+
       const photos = queryClient.getQueryData<PhotoMetadata[]>(['photos', user?.id]) || [];
       const photo = photos.find(p => p.id === photoId);
       if (!photo) throw new Error('Photo not found');
+
+      toast.loading('Analyzing photo with AI...', { id: `ai-rename-${photoId}` });
 
       const { data: signedUrlData, error: urlError } = await supabase.storage
         .from('user-photos')
         .createSignedUrl(photo.file_path, 300);
 
       if (urlError || !signedUrlData?.signedUrl) {
-        throw new Error('Failed to generate signed URL');
+        throw new Error('Failed to generate signed URL for photo');
       }
 
       const { data, error } = await supabase.functions.invoke('ai-photo-rename', {
@@ -374,17 +383,24 @@ export const usePhotoGalleryWithCache = () => {
         }
       });
 
-      if (error || !data?.success) {
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(`Function error: ${error.message}`);
+      }
+
+      if (!data?.success) {
+        console.error('AI rename failed:', data);
         throw new Error(data?.error || 'AI renaming failed');
       }
 
-      toast.success('Photo renamed with AI successfully');
+      toast.success(`Photo renamed to: ${data.newName}`, { id: `ai-rename-${photoId}` });
       queryClient.invalidateQueries({ queryKey: ['photos', user?.id] });
       return true;
 
     } catch (error) {
+      console.error('AI rename error:', error);
       errorLogger.logAiError('ai_photo_rename', error as Error, { photoId });
-      toast.error('Failed to rename photo with AI');
+      toast.error(`Failed to rename photo: ${(error as Error).message}`, { id: `ai-rename-${photoId}` });
       return false;
     }
   };

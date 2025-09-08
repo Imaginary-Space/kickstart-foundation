@@ -233,7 +233,8 @@ async function processPhoto(
               ]
             }
           ],
-          max_completion_tokens: 50,
+          max_tokens: 50,
+          temperature: 0.3
         }),
       });
 
@@ -297,7 +298,8 @@ Respond in JSON format: ${JSON.stringify({
               ]
             }
           ],
-          max_completion_tokens: 300,
+          max_tokens: 300,
+          temperature: 0.3
         }),
       });
 
