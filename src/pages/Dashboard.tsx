@@ -61,7 +61,7 @@ const Dashboard = () => {
               <div>
                 <h1 className="text-2xl font-bold">Dashboard</h1>
                 <div className="flex items-center gap-2">
-                  <p className="text-muted-foreground">Bienvenido, {user?.email}</p>
+                  <p className="text-muted-foreground">Welcome, {user?.email}</p>
                   {!roleLoading && roles.length > 0 && (
                     <div className="flex gap-1">
                       {roles.map(role => (
@@ -97,7 +97,7 @@ const Dashboard = () => {
                 className="glass flex items-center gap-2 hover:bg-background/20"
               >
                 <LogOut className="w-4 h-4" />
-                Cerrar Sesión
+                Sign Out
               </Button>
             </div>
           </div>
