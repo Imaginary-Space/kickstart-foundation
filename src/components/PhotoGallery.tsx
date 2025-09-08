@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles, RefreshCw } from 'lucide-react';
+import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles, RefreshCw, Bot } from 'lucide-react';
+import { BatchAnalysisDialog } from './BatchAnalysisDialog';
 import { usePhotoGalleryWithCache, PhotoMetadata } from '@/hooks/usePhotoGalleryWithCache';
 import { formatFileSize } from '@/utils/fileProcessing';
 import { format } from 'date-fns';
@@ -18,6 +19,7 @@ interface PhotoGalleryProps {
 }
 
 const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
+  const [showBatchAnalysisDialog, setShowBatchAnalysisDialog] = useState(false);
   const {
     photos,
     loading,
@@ -291,6 +293,12 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
           </div>
         )}
       </CardContent>
+      
+      <BatchAnalysisDialog
+        isOpen={showBatchAnalysisDialog}
+        onClose={() => setShowBatchAnalysisDialog(false)}
+        selectedPhotos={selectedPhotosList}
+      />
     </Card>
   );
 };

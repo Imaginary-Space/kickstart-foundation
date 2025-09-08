@@ -173,8 +173,97 @@ export type Database = {
         }
         Relationships: []
       }
+      jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          input_data: Json
+          job_type: string
+          output_data: Json | null
+          processed_items: number | null
+          progress: number | null
+          started_at: string | null
+          status: string
+          total_items: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_data: Json
+          job_type: string
+          output_data?: Json | null
+          processed_items?: number | null
+          progress?: number | null
+          started_at?: string | null
+          status?: string
+          total_items: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_data?: Json
+          job_type?: string
+          output_data?: Json | null
+          processed_items?: number | null
+          progress?: number | null
+          started_at?: string | null
+          status?: string
+          total_items?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      photo_tags: {
+        Row: {
+          confidence: number | null
+          created_at: string | null
+          id: string
+          photo_id: string
+          source: string | null
+          tag: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          photo_id: string
+          source?: string | null
+          tag: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          photo_id?: string
+          source?: string | null
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_tags_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photos: {
         Row: {
+          ai_description: string | null
+          ai_generated_tags: string[] | null
+          analysis_completed_at: string | null
           created_at: string
           file_name: string
           file_path: string
@@ -188,6 +277,9 @@ export type Database = {
           width: number | null
         }
         Insert: {
+          ai_description?: string | null
+          ai_generated_tags?: string[] | null
+          analysis_completed_at?: string | null
           created_at?: string
           file_name: string
           file_path: string
@@ -201,6 +293,9 @@ export type Database = {
           width?: number | null
         }
         Update: {
+          ai_description?: string | null
+          ai_generated_tags?: string[] | null
+          analysis_completed_at?: string | null
           created_at?: string
           file_name?: string
           file_path?: string
