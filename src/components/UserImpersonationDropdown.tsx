@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -25,14 +25,11 @@ export const UserImpersonationDropdown = () => {
   const { startImpersonation, stopImpersonation, isImpersonating, impersonatedUser } = useImpersonation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
-  useEffect(() => {
-    if (isAdmin()) {
-      fetchProfiles();
-    }
-  }, [isAdmin]);
-
-  const fetchProfiles = async () => {
+  const fetchProfiles = useCallback(async () => {
+    if (loading || hasLoadedOnce) return;
+    
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -47,13 +44,20 @@ export const UserImpersonationDropdown = () => {
       }
 
       setProfiles(data || []);
+      setHasLoadedOnce(true);
     } catch (error) {
       console.error('Error fetching profiles:', error);
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, hasLoadedOnce]);
+
+  useEffect(() => {
+    if (isAdmin() && !hasLoadedOnce && !loading) {
+      fetchProfiles();
+    }
+  }, [isAdmin, fetchProfiles, hasLoadedOnce, loading]);
 
   const handleImpersonate = (profile: Profile) => {
     const mockUser = {
