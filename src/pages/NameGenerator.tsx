@@ -5,14 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Copy, RefreshCw } from 'lucide-react';
+import { Sparkles, Copy, RefreshCw, Zap } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const NameGenerator = () => {
   const [nameType, setNameType] = useState<string>('business');
   const [keywords, setKeywords] = useState<string>('');
   const [generatedNames, setGeneratedNames] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [demoName, setDemoName] = useState<string>('');
+  const [demoSource, setDemoSource] = useState<'db' | 'redis' | ''>('');
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const { toast } = useToast();
 
   const nameTypes = [
@@ -57,6 +61,33 @@ const NameGenerator = () => {
     });
   };
 
+  const fetchRandomName = async () => {
+    setIsDemoLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('random-name');
+      
+      if (error) throw error;
+      
+      const result = await data;
+      setDemoName(result.name);
+      setDemoSource(result.source);
+      
+      toast({
+        title: "Random name fetched!",
+        description: `Source: ${result.source === 'redis' ? 'Cache' : 'Database'}`,
+      });
+    } catch (error) {
+      console.error('Error fetching random name:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch random name",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDemoLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <div className="container mx-auto px-4 py-8">
@@ -71,6 +102,59 @@ const NameGenerator = () => {
               Generate creative and unique names for your business, project, or brand using AI-powered suggestions
             </p>
           </div>
+
+          {/* API Demo Section */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5" />
+                API Demo
+              </CardTitle>
+              <CardDescription>
+                Test our random name API with Redis caching. Names are cached for 10 seconds.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Button 
+                  onClick={fetchRandomName}
+                  disabled={isDemoLoading}
+                  variant="ghost"
+                >
+                  {isDemoLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Fetching...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Get Random Name
+                    </>
+                  )}
+                </Button>
+                
+                {demoName && (
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="secondary"
+                      className="text-lg px-4 py-2 cursor-pointer hover:bg-accent transition-colors"
+                      onClick={() => copyToClipboard(demoName)}
+                    >
+                      {demoName}
+                    </Badge>
+                    <Badge variant={demoSource === 'redis' ? 'default' : 'outline'}>
+                      {demoSource === 'redis' ? 'Cache Hit' : 'Database'}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+              
+              <div className="text-xs text-muted-foreground">
+                <code>GET /api/random-name</code> • Returns: <code>{`{ name: string, source: "db" | "redis" }`}</code>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Generator Form */}
           <Card className="mb-8">
