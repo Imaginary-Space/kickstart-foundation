@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { toast } from 'sonner';
 import type { RenamePattern } from '@/types/photoRenamer';
 import { generateNewName } from '@/utils/fileNaming';
@@ -28,16 +27,9 @@ export interface PhotoMetadata {
 }
 
 export const usePhotoGalleryWithCache = () => {
-  const { user: authUser, session } = useAuth();
-  const { getEffectiveUser, getEffectiveUserId } = useImpersonation();
+  const { user, session } = useAuth();
   const posthog = usePostHog();
   const queryClient = useQueryClient();
-  
-  // Use effective user for impersonation support
-  const user = getEffectiveUser();
-  const userId = getEffectiveUserId();
-  
-  console.log('usePhotoGalleryWithCache - effective user:', { userId, email: user?.email });
   
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
@@ -47,30 +39,29 @@ export const usePhotoGalleryWithCache = () => {
 
   // Load cached preferences on mount
   useEffect(() => {
-    if (userId && session) {
-      const cachedPrefs = photoCacheManager.getCachedPreferences(userId);
+    if (user && session) {
+      const cachedPrefs = photoCacheManager.getCachedPreferences(user.id);
       if (cachedPrefs) {
         setSearchTerm(cachedPrefs.searchTerm);
         setSortBy(cachedPrefs.sortBy);
         setSortOrder(cachedPrefs.sortOrder);
       }
     }
-  }, [userId, session]);
+  }, [user, session]);
 
   // Photos query with caching
   const photosQuery = useQuery({
-    queryKey: ['photos', userId],
+    queryKey: ['photos', user?.id],
     queryFn: async () => {
-      if (!userId) throw new Error('No user ID available');
-      console.log('Fetching photos for user:', userId);
+      console.log('Fetching photos for user:', user.id);
       
       // Try to get cached data first for immediate display
-      const cachedPhotos = photoCacheManager.getCachedPhotos(userId);
+      const cachedPhotos = photoCacheManager.getCachedPhotos(user.id);
       
       const { data, error } = await supabase
         .from('photos')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -90,7 +81,7 @@ export const usePhotoGalleryWithCache = () => {
       );
 
       // Cache the fresh data
-      photoCacheManager.setCachedPhotos(userId, photosWithUrls, {
+      photoCacheManager.setCachedPhotos(user.id, photosWithUrls, {
         searchTerm,
         sortBy,
         sortOrder,
@@ -98,11 +89,11 @@ export const usePhotoGalleryWithCache = () => {
 
       return photosWithUrls;
     },
-    enabled: !!(userId && session),
+    enabled: !!(user && session),
     initialData: () => {
       // Return cached data immediately if available
-      if (userId && session) {
-        return photoCacheManager.getCachedPhotos(userId) || [];
+      if (user && session) {
+        return photoCacheManager.getCachedPhotos(user.id) || [];
       }
       return [];
     },
@@ -113,7 +104,7 @@ export const usePhotoGalleryWithCache = () => {
   // Upload mutation with optimistic updates
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!user) throw new Error('User not authenticated');
 
       // Get image dimensions
       const dimensions = await getImageDimensions(file);
@@ -121,7 +112,7 @@ export const usePhotoGalleryWithCache = () => {
       // Create unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
+      const filePath = `${user.id}/${fileName}`;
 
       // Upload to storage
       const { error: uploadError } = await supabase.storage
@@ -137,7 +128,7 @@ export const usePhotoGalleryWithCache = () => {
       const { data, error: dbError } = await supabase
         .from('photos')
         .insert({
-          user_id: userId,
+          user_id: user.id,
           original_name: file.name,
           file_name: fileName,
           file_path: filePath,
@@ -161,7 +152,7 @@ export const usePhotoGalleryWithCache = () => {
         file_size: file.size,
         file_type: file.type,
         image_dimensions: `${dimensions.width}x${dimensions.height}`,
-        user_id: userId,
+        user_id: user.id,
         timestamp: new Date().toISOString()
       });
 
@@ -169,10 +160,10 @@ export const usePhotoGalleryWithCache = () => {
     },
     onMutate: async (file) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['photos', userId] });
+      await queryClient.cancelQueries({ queryKey: ['photos', user?.id] });
 
       // Snapshot the previous value
-      const previousPhotos = queryClient.getQueryData<PhotoMetadata[]>(['photos', userId]);
+      const previousPhotos = queryClient.getQueryData<PhotoMetadata[]>(['photos', user?.id]);
 
       // Optimistically update with a temporary photo
       if (user) {

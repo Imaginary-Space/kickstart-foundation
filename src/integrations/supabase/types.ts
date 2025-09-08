@@ -224,24 +224,6 @@ export type Database = {
         }
         Relationships: []
       }
-      names: {
-        Row: {
-          created_at: string
-          id: string
-          label: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          label: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          label?: string
-        }
-        Relationships: []
-      }
       photo_tags: {
         Row: {
           confidence: number | null

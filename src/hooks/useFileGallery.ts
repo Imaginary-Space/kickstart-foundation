@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { toast } from 'sonner';
 import { errorLogger } from '@/utils/errorLogger';
 
@@ -19,8 +18,7 @@ export interface FileMetadata {
 }
 
 export const useFileGallery = () => {
-  const { user: authUser } = useAuth();
-  const { getEffectiveUser, getEffectiveUserId } = useImpersonation();
+  const { user } = useAuth();
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,12 +26,6 @@ export const useFileGallery = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [storageUsed, setStorageUsed] = useState<number>(0);
-
-  // Use effective user for impersonation support
-  const user = getEffectiveUser();
-  const userId = getEffectiveUserId();
-  
-  console.log('useFileGallery - effective user:', { userId, email: user?.email });
 
   const uploadFile = async (file: File): Promise<boolean> => {
     if (!user) {

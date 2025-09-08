@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ImpersonationProvider } from "@/contexts/ImpersonationContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { lazy, Suspense } from "react";
 
@@ -35,12 +34,11 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <ImpersonationProvider>
-        <TooltipProvider>
-          <ErrorBoundary>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+      <TooltipProvider>
+        <ErrorBoundary>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
             <Suspense fallback={<PageSkeleton />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -80,9 +78,8 @@ const App = () => (
           </BrowserRouter>
         </ErrorBoundary>
       </TooltipProvider>
-    </ImpersonationProvider>
-  </AuthProvider>
-</QueryClientProvider>
+    </AuthProvider>
+  </QueryClientProvider>
 );
 
 export default App;
