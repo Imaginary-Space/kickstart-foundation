@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { P5Background } from "@/components/P5Background";
+import { LazyP5Background } from "@/components/LazyP5Background";
 import { useState } from "react";
 import { Mail, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,12 +43,17 @@ export const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-subtle">
-      {/* P5.js Interactive Background */}
-      <P5Background />
+      {/* Lazy P5.js Interactive Background */}
+      <LazyP5Background />
       
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
-        <img src={heroImage} alt="Modern abstract background with flowing gradients" className="w-full h-full object-cover opacity-10" />
+        <img 
+          src={heroImage} 
+          alt="Modern abstract background with flowing gradients" 
+          className="w-full h-full object-cover opacity-10" 
+          decoding="async"
+        />
       </div>
       
       {/* Content */}

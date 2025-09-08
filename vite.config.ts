@@ -19,4 +19,38 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Performance optimization: Better chunking strategy
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks for better caching
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-slot', '@radix-ui/react-toast', 'lucide-react'],
+          'supabase-vendor': ['@supabase/supabase-js'],
+          'analytics-vendor': ['posthog-js', '@hotjar/browser'],
+          'p5-vendor': ['p5'],
+          // Landing page chunk
+          'landing': [
+            './src/components/Features.tsx',
+            './src/components/Testimonials.tsx',
+            './src/components/Pricing.tsx',
+            './src/components/Footer.tsx'
+          ]
+        },
+      },
+    },
+    // Enable compression and optimization
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: mode === 'production',
+      },
+    },
+    // Enable source maps in development only
+    sourcemap: mode === 'development',
+    // Optimize chunk size
+    chunkSizeWarningLimit: 1000,
+  },
 }));

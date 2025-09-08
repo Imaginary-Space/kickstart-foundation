@@ -3,14 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
-import { Features } from "@/components/Features";
-import { Testimonials } from "@/components/Testimonials";
-import { Pricing } from "@/components/Pricing";
-import { Footer } from "@/components/Footer";
+import { LazyFeatures } from "@/components/lazy/LazyFeatures";
+import { LazyTestimonials } from "@/components/lazy/LazyTestimonials";
+import { LazyPricing } from "@/components/lazy/LazyPricing";
+import { LazyFooter } from "@/components/lazy/LazyFooter";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  
+  // Initialize analytics after page load
+  useAnalytics();
 
   // Redirect logged-in users to dashboard
   useEffect(() => {
@@ -18,6 +22,7 @@ const Index = () => {
       navigate('/dashboard');
     }
   }, [user, loading, navigate]);
+  
   return (
     <main className="min-h-screen">
       {/* Fixed navigation bar with company logo and main navigation links */}
@@ -27,16 +32,16 @@ const Index = () => {
       <Hero />
       
       {/* Product features section showcasing AI-powered photo organization capabilities */}
-      <Features />
+      <LazyFeatures />
       
       {/* Social proof section with customer testimonials, ratings, and success stories */}
-      <Testimonials />
+      <LazyTestimonials />
       
       {/* Pricing section displaying different subscription plans and feature comparisons */}
-      <Pricing />
+      <LazyPricing />
       
       {/* Site footer with additional links, contact information, and secondary CTAs */}
-      <Footer />
+      <LazyFooter />
     </main>
   );
 };
