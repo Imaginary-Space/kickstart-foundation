@@ -55,7 +55,11 @@ const App = () => (
                     </ProtectedRoute>
                   </Suspense>
                 } />
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <Login />
+                  </Suspense>
+                } />
                 <Route path="/styleguide" element={<Styleguide />} />
                 <Route path="/admin" element={
                   <Suspense fallback={<PageSkeleton />}>
