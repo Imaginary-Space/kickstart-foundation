@@ -41,13 +41,7 @@ export default defineConfig(({ mode }) => ({
       },
     },
     // Enable compression and optimization
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-        drop_debugger: mode === 'production',
-      },
-    },
+    minify: mode === 'production' ? 'esbuild' : false,
     // Enable source maps in development only
     sourcemap: mode === 'development',
     // Optimize chunk size
