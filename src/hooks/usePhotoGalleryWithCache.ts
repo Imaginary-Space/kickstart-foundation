@@ -24,9 +24,20 @@ export interface PhotoMetadata {
 }
 
 export const usePhotoGalleryWithCache = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const posthog = usePostHog();
   const queryClient = useQueryClient();
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('usePhotoGalleryWithCache - Debug info:', {
+      hasUser: !!user,
+      userId: user?.id,
+      hasSession: !!session,
+      sessionExpiry: session?.expires_at,
+      timestamp: new Date().toISOString()
+    });
+  }, [user, session]);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
@@ -36,7 +47,7 @@ export const usePhotoGalleryWithCache = () => {
 
   // Load cached preferences on mount
   useEffect(() => {
-    if (user) {
+    if (user && session) {
       const cachedPrefs = photoCacheManager.getCachedPreferences(user.id);
       if (cachedPrefs) {
         setSearchTerm(cachedPrefs.searchTerm);
@@ -44,14 +55,19 @@ export const usePhotoGalleryWithCache = () => {
         setSortOrder(cachedPrefs.sortOrder);
       }
     }
-  }, [user]);
+  }, [user, session]);
 
   // Photos query with caching
   const photosQuery = useQuery({
     queryKey: ['photos', user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || !session) {
+        console.log('Query aborted - missing user or session');
+        return [];
+      }
 
+      console.log('Fetching photos for user:', user.id);
+      
       // Try to get cached data first for immediate display
       const cachedPhotos = photoCacheManager.getCachedPhotos(user.id);
       
@@ -61,7 +77,12 @@ export const usePhotoGalleryWithCache = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Photo query error:', error);
+        throw error;
+      }
+
+      console.log('Photos fetched successfully:', data?.length || 0, 'photos');
 
       // Get signed URLs for photos
       const photosWithUrls = await Promise.all(
@@ -86,10 +107,10 @@ export const usePhotoGalleryWithCache = () => {
 
       return photosWithUrls;
     },
-    enabled: !!user,
+    enabled: !!(user && session),
     initialData: () => {
       // Return cached data immediately if available
-      if (user) {
+      if (user && session) {
         return photoCacheManager.getCachedPhotos(user.id) || [];
       }
       return [];
@@ -97,6 +118,18 @@ export const usePhotoGalleryWithCache = () => {
     staleTime: 2 * 60 * 1000, // 2 minutes - photos don't change that often
     gcTime: 10 * 60 * 1000, // 10 minutes in memory
   });
+
+  // Force session refresh if we have a user but photos query is failing
+  useEffect(() => {
+    const refreshSessionIfNeeded = async () => {
+      if (user && session && photosQuery.isError) {
+        console.log('Refreshing session due to query error');
+        await supabase.auth.refreshSession();
+      }
+    };
+    
+    refreshSessionIfNeeded();
+  }, [user, session, photosQuery.isError]);
 
   // Upload mutation with optimistic updates
   const uploadMutation = useMutation({
@@ -406,6 +439,12 @@ export const usePhotoGalleryWithCache = () => {
     setSelectedPhotos(new Set());
   };
 
+  const manualRefresh = () => {
+    console.log('Manual refresh triggered');
+    queryClient.invalidateQueries({ queryKey: ['photos', user?.id] });
+    queryClient.refetchQueries({ queryKey: ['photos', user?.id] });
+  };
+
   const deleteSelectedPhotos = async (): Promise<boolean> => {
     const selectedPhotosList = filteredAndSortedPhotos.filter(photo => 
       selectedPhotos.has(photo.id)
@@ -561,6 +600,7 @@ export const usePhotoGalleryWithCache = () => {
     uploadPhoto,
     deletePhoto,
     fetchPhotos: () => queryClient.invalidateQueries({ queryKey: ['photos', user?.id] }),
+    manualRefresh,
     batchRenamePhotos,
     togglePhotoSelection,
     selectAllPhotos,

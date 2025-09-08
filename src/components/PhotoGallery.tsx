@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles } from 'lucide-react';
+import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles, RefreshCw } from 'lucide-react';
 import { usePhotoGalleryWithCache, PhotoMetadata } from '@/hooks/usePhotoGalleryWithCache';
 import { formatFileSize } from '@/utils/fileProcessing';
 import { format } from 'date-fns';
@@ -37,6 +37,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
     clearSelection,
     deleteSelectedPhotos,
     aiRenamePhoto,
+    manualRefresh,
   } = usePhotoGalleryWithCache();
 
   const selectedPhotosList = photos.filter(photo => selectedPhotos.has(photo.id));
@@ -88,6 +89,15 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
               <HardDrive className="w-4 h-4" />
               <span>{formatStorageUsage(storageUsed)} used</span>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={manualRefresh}
+              className="flex items-center gap-1 text-xs glass border-0 hover:bg-background/20"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Refresh
+            </Button>
             {isSomeSelected && (
               <Badge variant="secondary">
                 {selectedPhotos.size} selected
