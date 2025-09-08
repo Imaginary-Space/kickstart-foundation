@@ -25,7 +25,7 @@ const defaultPattern: RenamePattern = {
   startNumber: 1,
   dateFormat: 'YYYY-MM-DD',
   caseTransform: 'none',
-  separator: '_',
+  separator: 'none',
   removeSpaces: false,
   removeSpecialChars: false,
 };
@@ -155,7 +155,7 @@ const BatchRenameDialog: React.FC<BatchRenameDialogProps> = ({
                     <SelectItem value="_">Underscore (_)</SelectItem>
                     <SelectItem value="-">Dash (-)</SelectItem>
                     <SelectItem value=" ">Space ( )</SelectItem>
-                    <SelectItem value="">No Separator</SelectItem>
+                    <SelectItem value="none">No Separator</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

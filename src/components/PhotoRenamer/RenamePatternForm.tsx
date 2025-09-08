@@ -102,7 +102,7 @@ export const RenamePatternForm: React.FC<RenamePatternFormProps> = ({
                 <SelectItem value="-">Hyphen (-)</SelectItem>
                 <SelectItem value=".">Dot (.)</SelectItem>
                 <SelectItem value=" ">Space ( )</SelectItem>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none">None</SelectItem>
               </SelectContent>
             </Select>
           </div>

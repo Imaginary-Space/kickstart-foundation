@@ -19,7 +19,7 @@ const defaultPattern: RenamePattern = {
   startNumber: 1,
   dateFormat: 'YYYY-MM-DD',
   caseTransform: 'none',
-  separator: '_',
+  separator: 'none',
   removeSpaces: true,
   removeSpecialChars: true
 };

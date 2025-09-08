@@ -3,6 +3,9 @@ import type { PhotoFile, RenamePattern } from '@/types/photoRenamer';
 export const generateNewName = (file: PhotoFile, index: number, pattern: RenamePattern): string => {
   let newName = '';
   
+  // Handle separator - convert "none" to empty string
+  const separator = pattern.separator === 'none' ? '' : pattern.separator;
+  
   // Add prefix
   if (pattern.prefix) {
     newName += pattern.prefix;
@@ -10,7 +13,7 @@ export const generateNewName = (file: PhotoFile, index: number, pattern: RenameP
 
   // Add separator if we have a prefix and will add more content
   if (newName && (pattern.numberFormat !== 'none' || pattern.suffix)) {
-    newName += pattern.separator;
+    newName += separator;
   }
 
   // Add numbering/dating
@@ -35,7 +38,7 @@ export const generateNewName = (file: PhotoFile, index: number, pattern: RenameP
 
   // Add separator if we have content and will add suffix
   if (newName && pattern.suffix) {
-    newName += pattern.separator;
+    newName += separator;
   }
 
   // Add suffix
@@ -45,7 +48,7 @@ export const generateNewName = (file: PhotoFile, index: number, pattern: RenameP
 
   // Apply transformations
   if (pattern.removeSpaces) {
-    newName = newName.replace(/\s+/g, pattern.separator);
+    newName = newName.replace(/\s+/g, separator);
   }
 
   if (pattern.removeSpecialChars) {
@@ -61,9 +64,9 @@ export const generateNewName = (file: PhotoFile, index: number, pattern: RenameP
       newName = newName.toUpperCase();
       break;
     case 'capitalize':
-      newName = newName.split(pattern.separator)
+      newName = newName.split(separator)
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(pattern.separator);
+        .join(separator);
       break;
   }
 
