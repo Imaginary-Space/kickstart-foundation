@@ -173,6 +173,42 @@ export type Database = {
         }
         Relationships: []
       }
+      health_metrics: {
+        Row: {
+          created_at: string
+          endpoint_name: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          response_time_ms: number
+          status_code: number
+          success: boolean
+          timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint_name: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          response_time_ms: number
+          status_code: number
+          success?: boolean
+          timestamp?: string
+        }
+        Update: {
+          created_at?: string
+          endpoint_name?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          response_time_ms?: number
+          status_code?: number
+          success?: boolean
+          timestamp?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           completed_at: string | null
@@ -221,6 +257,24 @@ export type Database = {
           total_items?: number
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      names: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
         }
         Relationships: []
       }

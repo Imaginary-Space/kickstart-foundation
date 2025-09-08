@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Users } from 'lucide-react';
+import { Shield, Users, Activity } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 import { ErrorLogsTable } from './ErrorLogsTable';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import HealthStatusPanel from './HealthStatusPanel';
 
 type AppRole = Database['public']['Enums']['app_role'];
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -147,56 +149,80 @@ const AdminPanel = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            User Management
-          </CardTitle>
-          <CardDescription>
-            Manage user roles and permissions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {users.map((user) => {
-              const userRole = user.user_roles[0]?.role || 'user';
-              
-              return (
-                <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <div className="font-medium">{user.full_name || 'No name'}</div>
-                    <div className="text-sm text-muted-foreground">{user.email}</div>
-                  </div>
+      <Tabs defaultValue="users" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Users
+          </TabsTrigger>
+          <TabsTrigger value="health" className="flex items-center gap-2">
+            <Activity className="w-4 h-4" />
+            Health
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            Logs
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="users" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                User Management
+              </CardTitle>
+              <CardDescription>
+                Manage user roles and permissions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {users.map((user) => {
+                  const userRole = user.user_roles[0]?.role || 'user';
                   
-                  <div className="flex items-center gap-3">
-                    <Badge variant={userRole === 'admin' ? 'destructive' : userRole === 'moderator' ? 'secondary' : 'outline'}>
-                      {userRole}
-                    </Badge>
-                    
-                    <Select
-                      value={userRole}
-                      onValueChange={(newRole: AppRole) => updateUserRole(user.id, newRole)}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="user">User</SelectItem>
-                        <SelectItem value="moderator">Moderator</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Error Logs Section */}
-      <ErrorLogsTable />
+                  return (
+                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="font-medium">{user.full_name || 'No name'}</div>
+                        <div className="text-sm text-muted-foreground">{user.email}</div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <Badge variant={userRole === 'admin' ? 'destructive' : userRole === 'moderator' ? 'secondary' : 'outline'}>
+                          {userRole}
+                        </Badge>
+                        
+                        <Select
+                          value={userRole}
+                          onValueChange={(newRole: AppRole) => updateUserRole(user.id, newRole)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">User</SelectItem>
+                            <SelectItem value="moderator">Moderator</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="health" className="space-y-4">
+          <HealthStatusPanel />
+        </TabsContent>
+        
+        <TabsContent value="logs" className="space-y-4">
+          <ErrorLogsTable />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
