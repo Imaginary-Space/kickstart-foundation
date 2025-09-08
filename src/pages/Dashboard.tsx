@@ -43,87 +43,92 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900 p-6 relative">
-      {/* Glass orb background */}
-      <div className="orb-background">
-        <div className="extra-orb-1"></div>
-        <div className="extra-orb-2"></div>
-      </div>
-      
-      <div className="max-w-4xl mx-auto relative z-10">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="glass-header rounded-2xl p-6 mb-8">
-          <div className="flex items-center justify-between">
+        <header className="border-b bg-card/50 backdrop-blur-sm">
+          <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
-                <User className="w-5 h-5 text-primary-foreground" />
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                <User className="w-4 h-4 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Dashboard</h1>
-                <div className="flex items-center gap-2">
-                  <p className="text-muted-foreground">Bienvenido, {user?.email}</p>
-                  {!roleLoading && roles.length > 0 && (
-                    <div className="flex gap-1">
-                      {roles.map(role => (
-                        <Badge 
-                          key={role} 
-                          variant={role === 'admin' ? 'destructive' : role === 'moderator' ? 'secondary' : 'outline'}
-                          className="text-xs"
-                        >
-                          {role}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              {!roleLoading && roles.length > 0 && (
+                <div className="flex gap-1">
+                  {roles.map(role => (
+                    <Badge 
+                      key={role} 
+                      variant={role === 'admin' ? 'destructive' : 'secondary'}
+                      className="text-xs capitalize"
+                    >
+                      {role}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              
               {isAdmin() && (
                 <Button 
                   variant="default" 
+                  size="sm"
                   onClick={() => navigate('/admin')}
-                  className="glass flex items-center gap-2 hover:bg-background/20"
+                  className="gap-2"
                 >
                   <Shield className="w-4 h-4" />
-                  Admin Panel
+                  Admin
                 </Button>
               )}
               
               <Button 
                 variant="ghost" 
+                size="sm"
                 onClick={handleSignOut}
-                className="glass flex items-center gap-2 hover:bg-background/20"
+                className="gap-2"
               >
                 <LogOut className="w-4 h-4" />
-                Cerrar Sesión
+                Sign Out
               </Button>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Photo Upload */}
-        <div className="w-full mb-8">
-          <PhotoFileDropZone
-            onFiles={handlePhotoFiles}
-            isProcessing={photoLoading}
-            progress={0}
-            fileCount={0}
-            onSelectAll={noOpFunction}
-            onDeselectAll={noOpFunction}
-            onClearAll={noOpFunction}
-            previewMode="grid"
-            onPreviewModeChange={noOpFunction}
-          />
-        </div>
+        {/* Main Content */}
+        <main className="px-6 py-8 space-y-8">
+          {/* Upload Section */}
+          <section>
+            <div className="mb-4">
+              <h2 className="text-lg font-medium">Upload Photos</h2>
+              <p className="text-sm text-muted-foreground">Drag and drop your photos to get started</p>
+            </div>
+            <PhotoFileDropZone
+              onFiles={handlePhotoFiles}
+              isProcessing={photoLoading}
+              progress={0}
+              fileCount={0}
+              onSelectAll={noOpFunction}
+              onDeselectAll={noOpFunction}
+              onClearAll={noOpFunction}
+              previewMode="grid"
+              onPreviewModeChange={noOpFunction}
+            />
+          </section>
 
-        {/* Photo Gallery */}
-        <PhotoGallery className="glass-card border-0 mb-8" />
-        
+          {/* Gallery Section */}
+          <section>
+            <div className="mb-4">
+              <h2 className="text-lg font-medium">Your Photos</h2>
+              <p className="text-sm text-muted-foreground">Manage and organize your uploaded photos</p>
+            </div>
+            <PhotoGallery />
+          </section>
+        </main>
       </div>
-
-  
     </div>
   );
 };
