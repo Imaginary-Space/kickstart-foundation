@@ -1,19 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles, RefreshCw, Bot } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles, RefreshCw, Bot, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { BatchAnalysisDialog } from './BatchAnalysisDialog';
 import { useJobManager } from '@/hooks/useJobManager';
 import { usePhotoGalleryWithCache, PhotoMetadata } from '@/hooks/usePhotoGalleryWithCache';
 import { formatFileSize } from '@/utils/fileProcessing';
 import { format } from 'date-fns';
 import BatchRenameDialog from './BatchRenameDialog';
-import { GlareCard } from '@/components/ui/glare-card';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  createColumnHelper,
+  flexRender,
+  type ColumnDef,
+  type SortingState,
+  type RowSelectionState,
+} from '@tanstack/react-table';
 
 interface PhotoGalleryProps {
   className?: string;
@@ -21,32 +31,215 @@ interface PhotoGalleryProps {
 
 const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
   const [showBatchAnalysisDialog, setShowBatchAnalysisDialog] = useState(false);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [globalFilter, setGlobalFilter] = useState('');
+  
   const { startBatchAnalysis, isStartingJob, hasActiveJob } = useJobManager();
   const {
     photos,
     loading,
     isRenaming,
-    searchTerm,
-    setSearchTerm,
-    sortBy,
-    setSortBy,
-    sortOrder,
-    setSortOrder,
-    selectedPhotos,
     storageUsed,
     deletePhoto,
     batchRenamePhotos,
-    togglePhotoSelection,
-    selectAllPhotos,
-    clearSelection,
     deleteSelectedPhotos,
     aiRenamePhoto,
     manualRefresh,
   } = usePhotoGalleryWithCache();
 
+  // Convert row selection to photo selection
+  const selectedPhotos = useMemo(() => {
+    const selectedIds = Object.keys(rowSelection).filter(key => rowSelection[key]);
+    return new Set(selectedIds);
+  }, [rowSelection]);
+
   const selectedPhotosList = photos.filter(photo => selectedPhotos.has(photo.id));
   const isAllSelected = photos.length > 0 && selectedPhotos.size === photos.length;
   const isSomeSelected = selectedPhotos.size > 0;
+
+  const columnHelper = createColumnHelper<PhotoMetadata>();
+
+  const columns = useMemo<ColumnDef<PhotoMetadata>[]>(() => [
+    columnHelper.display({
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+          className="glass border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+          className="glass border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+      size: 40,
+    }),
+    columnHelper.accessor('original_name', {
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-8 p-0 hover:bg-transparent"
+        >
+          Photo
+          {column.getIsSorted() === "asc" ? (
+            <ArrowUp className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowDown className="ml-2 h-4 w-4" />
+          ) : (
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const photo = row.original;
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-lg overflow-hidden glass">
+              {photo.url ? (
+                <img
+                  src={photo.url}
+                  alt={photo.original_name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-sm truncate" title={photo.original_name}>
+                {photo.original_name}
+              </p>
+              {photo.width && photo.height && (
+                <p className="text-xs text-muted-foreground">
+                  {photo.width} × {photo.height}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor('file_size', {
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-8 p-0 hover:bg-transparent"
+        >
+          Size
+          {column.getIsSorted() === "asc" ? (
+            <ArrowUp className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowDown className="ml-2 h-4 w-4" />
+          ) : (
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      ),
+      cell: ({ getValue }) => (
+        <div className="flex items-center gap-1 text-sm">
+          <HardDrive className="w-3 h-3 text-muted-foreground" />
+          {formatFileSize(getValue() as number)}
+        </div>
+      ),
+    }),
+    columnHelper.accessor('created_at', {
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-8 p-0 hover:bg-transparent"
+        >
+          Date
+          {column.getIsSorted() === "asc" ? (
+            <ArrowUp className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowDown className="ml-2 h-4 w-4" />
+          ) : (
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      ),
+      cell: ({ getValue }) => (
+        <div className="flex items-center gap-1 text-sm">
+          <Calendar className="w-3 h-3 text-muted-foreground" />
+          {format(new Date(getValue() as string), 'MMM d, yyyy')}
+        </div>
+      ),
+    }),
+    columnHelper.display({
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        const photo = row.original;
+        return (
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => aiRenamePhoto(photo.id)}
+              disabled={loading}
+              className="h-8 w-8 p-0 hover:bg-primary/10"
+              title="AI Rename"
+            >
+              <Sparkles className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => downloadPhoto(photo)}
+              className="h-8 w-8 p-0 hover:bg-primary/10"
+              title="Download"
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleDeletePhoto(photo)}
+              className="h-8 w-8 p-0 hover:bg-destructive/10"
+              title="Delete"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        );
+      },
+      enableSorting: false,
+      size: 120,
+    }),
+  ], [loading]);
+
+  const table = useReactTable({
+    data: photos,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: 'includesString',
+    state: {
+      sorting,
+      rowSelection,
+      globalFilter,
+    },
+    getRowId: (row) => row.id,
+  });
 
   const handleDeletePhoto = async (photo: PhotoMetadata) => {
     if (window.confirm(`Are you sure you want to delete "${photo.original_name}"?`)) {
@@ -75,6 +268,25 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
     const mb = bytes / (1024 * 1024);
     const gb = mb / 1024;
     return gb >= 1 ? `${gb.toFixed(2)} GB` : `${mb.toFixed(1)} MB`;
+  };
+
+  const togglePhotoSelection = (photoId: string) => {
+    setRowSelection(prev => ({
+      ...prev,
+      [photoId]: !prev[photoId]
+    }));
+  };
+
+  const selectAllPhotos = () => {
+    const allIds = photos.reduce((acc, photo) => {
+      acc[photo.id] = true;
+      return acc;
+    }, {} as RowSelectionState);
+    setRowSelection(allIds);
+  };
+
+  const clearSelection = () => {
+    setRowSelection({});
   };
 
   return (
@@ -181,20 +393,20 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search photos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
               className="pl-10"
             />
           </div>
           
           <div className="flex gap-2 items-center">
             {photos.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={isAllSelected ? clearSelection : selectAllPhotos}
-              className="flex items-center gap-2 glass border-0 hover:bg-background/20"
-            >
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={isAllSelected ? clearSelection : selectAllPhotos}
+                className="flex items-center gap-2 glass border-0 hover:bg-background/20"
+              >
                 {isAllSelected ? (
                   <CheckSquare className="w-4 h-4" />
                 ) : (
@@ -203,125 +415,70 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
                 {isAllSelected ? 'Deselect All' : 'Select All'}
               </Button>
             )}
-            
-            <Select value={sortBy} onValueChange={(value: 'name' | 'date' | 'size') => setSortBy(value)}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date">Date</SelectItem>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="size">Size</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="glass border-0 hover:bg-background/20"
-            >
-              {sortOrder === 'asc' ? '↑' : '↓'}
-            </Button>
           </div>
         </div>
       </CardHeader>
       
       <CardContent>
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-square bg-muted rounded-lg animate-pulse" />
-            ))}
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : photos.length === 0 ? (
           <div className="text-center py-12">
             <Grid className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No photos yet</h3>
             <p className="text-muted-foreground">
-              {searchTerm ? 'No photos match your search.' : 'Upload some photos to get started!'}
+              {globalFilter ? 'No photos match your search.' : 'Upload some photos to get started!'}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {photos.map((photo) => (
-                <div key={photo.id} className="group relative">
-                  {/* Selection Checkbox */}
-                  <div className="absolute top-4 left-4 z-20">
-                    <Checkbox
-                      checked={selectedPhotos.has(photo.id)}
-                      onCheckedChange={() => togglePhotoSelection(photo.id)}
-                      className="glass border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    />
-                  </div>
-                  
-                  <GlareCard className="relative overflow-hidden aspect-square">
-                    {photo.url ? (
-                      <img
-                        src={photo.url}
-                        alt={photo.original_name}
-                        className="w-full h-full absolute inset-0 object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-muted flex items-center justify-center">
-                        <FileText className="w-8 h-8 text-muted-foreground" />
-                      </div>
-                    )}
-                   
-                      {/* Overlay with actions */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-30 pointer-events-none group-hover:pointer-events-auto">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => aiRenamePhoto(photo.id)}
-                          disabled={loading}
-                          className="neon-border text-white hover:bg-white/20 relative z-40 pointer-events-auto"
-                        >
-                          <Sparkles className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => downloadPhoto(photo)}
-                          className="neon-border text-white hover:bg-white/20 relative z-40 pointer-events-auto"
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDeletePhoto(photo)}
-                          className="neon-border text-white hover:bg-destructive/20 hover:text-destructive relative z-40 pointer-events-auto"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    
-                    {/* Photo info overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <h4 className="font-medium text-sm text-white truncate mb-1" title={photo.original_name}>
-                        {photo.original_name}
-                      </h4>
-                      <div className="flex items-center justify-between text-xs text-white/80">
-                        <div className="flex items-center gap-1">
-                          <HardDrive className="w-3 h-3" />
-                          {formatFileSize(photo.file_size)}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {format(new Date(photo.created_at), 'MMM d')}
-                        </div>
-                      </div>
-                      {photo.width && photo.height && (
-                        <div className="text-xs text-white/60 mt-1">
-                          {photo.width} × {photo.height}
-                        </div>
-                      )}
-                    </div>
-                  </GlareCard>
-              </div>
-            ))}
+          <div className="glass rounded-lg border-0">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id} className="border-border/20 hover:bg-transparent">
+                    {headerGroup.headers.map((header) => (
+                      <TableHead 
+                        key={header.id} 
+                        style={{ width: header.getSize() }}
+                        className="text-foreground font-medium"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      className="border-border/20 hover:bg-muted/50 data-[state=selected]:bg-primary/5"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="py-3">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      No photos found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         )}
       </CardContent>
