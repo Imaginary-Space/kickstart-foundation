@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, Star, Zap } from "lucide-react";
+import { LazyImage } from "@/components/LazyImage";
 
 const pricingPlans = [
   {
@@ -67,7 +68,7 @@ export const Pricing = () => {
           </div>
           <div className="flex items-center justify-center gap-8 mb-8">
             <div className="hidden md:block">
-              <img 
+              <LazyImage 
                 src="/lovable-uploads/ac94489c-c1a3-4b83-b2e2-d1417504c47c.png" 
                 alt="Vintage camera representing photo organization" 
                 className="w-24 h-24 object-contain opacity-80" 
@@ -82,7 +83,7 @@ export const Pricing = () => {
               </p>
             </div>
             <div className="hidden md:block">
-              <img 
+              <LazyImage 
                 src="/lovable-uploads/ac94489c-c1a3-4b83-b2e2-d1417504c47c.png" 
                 alt="Vintage camera representing photo organization" 
                 className="w-24 h-24 object-contain opacity-80 scale-x-[-1]" 
