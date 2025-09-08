@@ -23,8 +23,19 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
+    console.log('Environment variables check:', {
+      hasOpenAI: !!openaiApiKey,
+      hasSupabaseUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+      supabaseUrl: supabaseUrl ? 'present' : 'missing'
+    });
+
     if (!openaiApiKey || !supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Missing required environment variables');
+      const missing = [];
+      if (!openaiApiKey) missing.push('OPENAI_API_KEY');
+      if (!supabaseUrl) missing.push('SUPABASE_URL');
+      if (!supabaseServiceKey) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+      throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
     }
 
     // Initialize Supabase client with service role key
