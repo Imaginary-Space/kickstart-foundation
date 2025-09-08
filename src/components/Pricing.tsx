@@ -65,12 +65,30 @@ export const Pricing = () => {
             <Zap className="w-4 h-4" />
             Special Launch Pricing - 50% Off First 3 Months
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Choose Your Perfect Plan
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Start organizing your photos today. No contracts, cancel anytime.
-          </p>
+          <div className="flex items-center justify-center gap-8 mb-8">
+            <div className="hidden md:block">
+              <img 
+                src="/lovable-uploads/ac94489c-c1a3-4b83-b2e2-d1417504c47c.png" 
+                alt="Vintage camera representing photo organization" 
+                className="w-24 h-24 object-contain opacity-80" 
+              />
+            </div>
+            <div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                Choose Your Perfect Plan
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Start organizing your photos today. No contracts, cancel anytime.
+              </p>
+            </div>
+            <div className="hidden md:block">
+              <img 
+                src="/lovable-uploads/ac94489c-c1a3-4b83-b2e2-d1417504c47c.png" 
+                alt="Vintage camera representing photo organization" 
+                className="w-24 h-24 object-contain opacity-80 scale-x-[-1]" 
+              />
+            </div>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
