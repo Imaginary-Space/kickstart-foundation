@@ -57,11 +57,19 @@ export const ImpersonationProvider = ({ children }: ImpersonationProviderProps) 
   };
 
   const getEffectiveUser = (): User | null => {
-    return impersonatedUser || authUser;
+    const effectiveUser = impersonatedUser || authUser;
+    console.log('getEffectiveUser called:', { 
+      impersonatedUser: impersonatedUser?.email, 
+      authUser: authUser?.email, 
+      effectiveUser: effectiveUser?.email 
+    });
+    return effectiveUser;
   };
 
   const getEffectiveUserId = (): string | null => {
-    return getEffectiveUser()?.id || null;
+    const userId = getEffectiveUser()?.id || null;
+    console.log('getEffectiveUserId called:', userId);
+    return userId;
   };
 
   const isImpersonating = !!impersonatedUser && !!realAdminUser;
