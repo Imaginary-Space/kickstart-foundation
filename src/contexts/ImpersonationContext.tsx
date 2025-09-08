@@ -34,16 +34,24 @@ export const ImpersonationProvider = ({ children }: ImpersonationProviderProps) 
   const [realAdminUser, setRealAdminUser] = useState<User | null>(null);
 
   const startImpersonation = (user: User) => {
+    console.log('ImpersonationContext: Starting impersonation', { 
+      isAdmin: isAdmin(), 
+      authUser: authUser?.email, 
+      targetUser: user.email 
+    });
+    
     if (!isAdmin() || !authUser) {
-      console.error('Only admins can impersonate users');
+      console.error('Only admins can impersonate users', { isAdmin: isAdmin(), authUser: !!authUser });
       return;
     }
     
+    console.log('Setting impersonation state');
     setRealAdminUser(authUser);
     setImpersonatedUser(user);
   };
 
   const stopImpersonation = () => {
+    console.log('ImpersonationContext: Stopping impersonation');
     setImpersonatedUser(null);
     setRealAdminUser(null);
   };
