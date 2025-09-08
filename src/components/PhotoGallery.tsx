@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles, RefreshCw, Bot, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles, RefreshCw, Bot, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown, ChevronUp, Filter, SlidersHorizontal, Eye, EyeOff } from 'lucide-react';
 import { BatchAnalysisDialog } from './BatchAnalysisDialog';
 import { useJobManager } from '@/hooks/useJobManager';
 import { usePhotoGalleryWithCache, PhotoMetadata } from '@/hooks/usePhotoGalleryWithCache';
@@ -18,11 +18,15 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
+  getExpandedRowModel,
   createColumnHelper,
   flexRender,
   type ColumnDef,
   type SortingState,
   type RowSelectionState,
+  type PaginationState,
+  type ExpandedState,
 } from '@tanstack/react-table';
 
 interface PhotoGalleryProps {
@@ -34,6 +38,13 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [globalFilter, setGlobalFilter] = useState('');
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 25,
+  });
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+  const [dateFilter, setDateFilter] = useState('all');
+  const [sizeFilter, setSizeFilter] = useState('all');
   
   const { startBatchAnalysis, isStartingJob, hasActiveJob } = useJobManager();
   const {
@@ -61,6 +72,27 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
   const columnHelper = createColumnHelper<PhotoMetadata>();
 
   const columns = useMemo<ColumnDef<PhotoMetadata>[]>(() => [
+    columnHelper.display({
+      id: 'expand',
+      header: '',
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => row.toggleExpanded()}
+          className="h-8 w-8 p-0 hover:bg-transparent"
+        >
+          {row.getIsExpanded() ? (
+            <ChevronUp className="w-4 h-4" />
+          ) : (
+            <ChevronDown className="w-4 h-4" />
+          )}
+        </Button>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+      size: 40,
+    }),
     columnHelper.display({
       id: 'select',
       header: ({ table }) => (
@@ -221,24 +253,140 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
       enableSorting: false,
       size: 120,
     }),
+    columnHelper.display({
+      id: 'expandedDetails',
+      cell: ({ row }) => {
+        if (!row.getIsExpanded()) return null;
+        const photo = row.original;
+        return (
+          <div className="p-4 glass rounded-lg border border-border/20 bg-background/50">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Details</h4>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <div>File: {photo.file_name}</div>
+                  <div>Type: {photo.mime_type}</div>
+                  <div>Size: {formatFileSize(photo.file_size)}</div>
+                  {photo.width && photo.height && (
+                    <div>Dimensions: {photo.width} × {photo.height}</div>
+                  )}
+                  <div>Created: {format(new Date(photo.created_at), 'PPpp')}</div>
+                  {photo.updated_at !== photo.created_at && (
+                    <div>Modified: {format(new Date(photo.updated_at), 'PPpp')}</div>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">AI Analysis</h4>
+                {photo.ai_description && (
+                  <div className="text-xs">
+                    <span className="text-muted-foreground">Description:</span>
+                    <p className="mt-1">{photo.ai_description}</p>
+                  </div>
+                )}
+                {photo.ai_generated_tags && photo.ai_generated_tags.length > 0 && (
+                  <div className="text-xs">
+                    <span className="text-muted-foreground">Tags:</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {photo.ai_generated_tags.map((tag, index) => (
+                        <Badge key={index} variant="outline" className="text-xs px-1 py-0">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {photo.analysis_completed_at && (
+                  <div className="text-xs text-muted-foreground">
+                    Analyzed: {format(new Date(photo.analysis_completed_at), 'PPp')}
+                  </div>
+                )}
+              </div>
+            </div>
+            {photo.url && (
+              <div className="mt-4">
+                <h4 className="font-medium text-sm mb-2">Preview</h4>
+                <div className="w-full max-w-md mx-auto glass rounded-lg overflow-hidden">
+                  <img
+                    src={photo.url}
+                    alt={photo.original_name}
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      },
+      enableSorting: false,
+      enableHiding: false,
+    }),
   ], [loading]);
 
+  // Filter photos based on date and size filters
+  const filteredPhotos = useMemo(() => {
+    let filtered = photos;
+    
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      const filterDate = new Date();
+      
+      switch (dateFilter) {
+        case 'today':
+          filterDate.setHours(0, 0, 0, 0);
+          break;
+        case 'week':
+          filterDate.setDate(now.getDate() - 7);
+          break;
+        case 'month':
+          filterDate.setMonth(now.getMonth() - 1);
+          break;
+        case 'year':
+          filterDate.setFullYear(now.getFullYear() - 1);
+          break;
+      }
+      
+      filtered = filtered.filter(photo => new Date(photo.created_at) >= filterDate);
+    }
+    
+    if (sizeFilter !== 'all') {
+      const sizeMap = {
+        small: [0, 1024 * 1024], // < 1MB
+        medium: [1024 * 1024, 5 * 1024 * 1024], // 1-5MB
+        large: [5 * 1024 * 1024, Infinity], // > 5MB
+      };
+      
+      const [min, max] = sizeMap[sizeFilter as keyof typeof sizeMap];
+      filtered = filtered.filter(photo => photo.file_size >= min && photo.file_size < max);
+    }
+    
+    return filtered;
+  }, [photos, dateFilter, sizeFilter]);
+
   const table = useReactTable({
-    data: photos,
+    data: filteredPhotos,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
+    onExpandedChange: setExpanded,
     globalFilterFn: 'includesString',
     state: {
       sorting,
       rowSelection,
       globalFilter,
+      pagination,
+      expanded,
     },
     getRowId: (row) => row.id,
+    getRowCanExpand: () => true,
   });
 
   const handleDeletePhoto = async (photo: PhotoMetadata) => {
@@ -388,31 +536,101 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
         )}
         
         {/* Search and Filter Controls */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search photos..."
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-10"
-            />
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search photos..."
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <div className="flex gap-2 items-center">
+              {photos.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={isAllSelected ? clearSelection : selectAllPhotos}
+                  className="flex items-center gap-2 glass border-0 hover:bg-background/20"
+                >
+                  {isAllSelected ? (
+                    <CheckSquare className="w-4 h-4" />
+                  ) : (
+                    <Square className="w-4 h-4" />
+                  )}
+                  {isAllSelected ? 'Deselect All' : 'Select All'}
+                </Button>
+              )}
+            </div>
           </div>
           
-          <div className="flex gap-2 items-center">
-            {photos.length > 0 && (
+          {/* Advanced Filters */}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Filters:</span>
+            </div>
+            
+            <div className="flex gap-2 flex-wrap">
+              <Select value={dateFilter} onValueChange={setDateFilter}>
+                <SelectTrigger className="w-32 h-8 glass border-border/20">
+                  <Calendar className="w-3 h-3 mr-1" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={sizeFilter} onValueChange={setSizeFilter}>
+                <SelectTrigger className="w-32 h-8 glass border-border/20">
+                  <HardDrive className="w-3 h-3 mr-1" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sizes</SelectItem>
+                  <SelectItem value="small">&lt; 1MB</SelectItem>
+                  <SelectItem value="medium">1-5MB</SelectItem>
+                  <SelectItem value="large">&gt; 5MB</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select 
+                value={pagination.pageSize.toString()} 
+                onValueChange={(value) => setPagination(prev => ({ ...prev, pageSize: parseInt(value) }))}
+              >
+                <SelectTrigger className="w-28 h-8 glass border-border/20">
+                  <Eye className="w-3 h-3 mr-1" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10 per page</SelectItem>
+                  <SelectItem value="25">25 per page</SelectItem>
+                  <SelectItem value="50">50 per page</SelectItem>
+                  <SelectItem value="100">100 per page</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {(dateFilter !== 'all' || sizeFilter !== 'all') && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={isAllSelected ? clearSelection : selectAllPhotos}
-                className="flex items-center gap-2 glass border-0 hover:bg-background/20"
+                onClick={() => {
+                  setDateFilter('all');
+                  setSizeFilter('all');
+                }}
+                className="text-xs glass border-0 hover:bg-background/20"
               >
-                {isAllSelected ? (
-                  <CheckSquare className="w-4 h-4" />
-                ) : (
-                  <Square className="w-4 h-4" />
-                )}
-                {isAllSelected ? 'Deselect All' : 'Select All'}
+                <X className="w-3 h-3 mr-1" />
+                Clear Filters
               </Button>
             )}
           </div>
@@ -458,27 +676,104 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
               <TableBody>
                 {table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                      className="border-border/20 hover:bg-muted/50 data-[state=selected]:bg-primary/5"
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="py-3">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </TableRow>
+                    <React.Fragment key={row.id}>
+                      <TableRow
+                        data-state={row.getIsSelected() && "selected"}
+                        className="border-border/20 hover:bg-muted/50 data-[state=selected]:bg-primary/5"
+                      >
+                        {row.getVisibleCells().map((cell) => {
+                          if (cell.column.id === 'expandedDetails') return null;
+                          return (
+                            <TableCell key={cell.id} className="py-3">
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                      {row.getIsExpanded() && (
+                        <TableRow>
+                          <TableCell colSpan={columns.length - 1} className="p-0 border-0">
+                            {flexRender(
+                              row.getVisibleCells().find(cell => cell.column.id === 'expandedDetails')?.column.columnDef.cell,
+                              row.getVisibleCells().find(cell => cell.column.id === 'expandedDetails')?.getContext()
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                    <TableCell colSpan={columns.length - 1} className="h-24 text-center">
                       No photos found.
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
+            
+            {/* Pagination Controls */}
+            {table.getPageCount() > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-border/20">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>
+                    Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+                    {Math.min(
+                      (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                      table.getPrePaginationRowModel().rows.length
+                    )}{' '}
+                    of {table.getPrePaginationRowModel().rows.length} photos
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => table.setPageIndex(0)}
+                    disabled={!table.getCanPreviousPage()}
+                    className="h-8 w-8 p-0 glass border-0"
+                  >
+                    <ChevronsLeft className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    className="h-8 w-8 p-0 glass border-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  
+                  <div className="flex items-center gap-1 mx-2">
+                    <span className="text-sm text-muted-foreground">Page</span>
+                    <span className="text-sm font-medium">
+                      {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                    </span>
+                  </div>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                    className="h-8 w-8 p-0 glass border-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                    disabled={!table.getCanNextPage()}
+                    className="h-8 w-8 p-0 glass border-0"
+                  >
+                    <ChevronsRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

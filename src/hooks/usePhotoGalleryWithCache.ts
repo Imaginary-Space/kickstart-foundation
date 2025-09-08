@@ -21,6 +21,9 @@ export interface PhotoMetadata {
   created_at: string;
   updated_at: string;
   url?: string;
+  ai_description?: string;
+  ai_generated_tags?: string[];
+  analysis_completed_at?: string;
 }
 
 export const usePhotoGalleryWithCache = () => {
