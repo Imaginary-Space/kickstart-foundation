@@ -1,9 +1,11 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useImpersonation } from "@/contexts/ImpersonationContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User, Shield } from "lucide-react";
+import { LogOut, User, Shield, UserX } from "lucide-react";
+import { UserImpersonationDropdown } from "@/components/UserImpersonationDropdown";
 import { FileDropZone as PhotoFileDropZone } from "@/components/PhotoRenamer/FileDropZone";
 import { usePhotoRenamer } from "@/hooks/usePhotoRenamer";
 import { usePhotoGalleryWithCache } from "@/hooks/usePhotoGalleryWithCache";
@@ -17,6 +19,7 @@ const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { isAdmin, roles, loading: roleLoading } = useUserRole();
+  const { isImpersonating, impersonatedUser, realAdminUser, stopImpersonation, getEffectiveUser } = useImpersonation();
   
   const { uploadPhoto, loading: photoLoading } = usePhotoGalleryWithCache();
   const { uploadFile, loading: fileLoading } = useFileGallery();
@@ -53,8 +56,24 @@ const Dashboard = () => {
                 <User className="w-4 h-4 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                <h1 className="text-xl font-semibold tracking-tight">
+                  Dashboard
+                  {isImpersonating && (
+                    <Badge variant="destructive" className="ml-2 text-xs">
+                      Impersonating
+                    </Badge>
+                  )}
+                </h1>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">
+                    {getEffectiveUser()?.email}
+                  </p>
+                  {isImpersonating && (
+                    <p className="text-xs text-muted-foreground">
+                      Real admin: {realAdminUser?.email}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -72,6 +91,20 @@ const Dashboard = () => {
                   ))}
                 </div>
               )}
+              
+              {isImpersonating && (
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={stopImpersonation}
+                  className="gap-2"
+                >
+                  <UserX className="w-4 h-4" />
+                  Stop Impersonation
+                </Button>
+              )}
+              
+              {isAdmin() && <UserImpersonationDropdown />}
               
               {isAdmin() && (
                 <Button 
