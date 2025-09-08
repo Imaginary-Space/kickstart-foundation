@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Grid, Trash2, Download, Calendar, FileText, HardDrive, CheckSquare, Square, X, Sparkles } from 'lucide-react';
-import { usePhotoGallery, PhotoMetadata } from '@/hooks/usePhotoGallery';
+import { usePhotoGalleryWithCache, PhotoMetadata } from '@/hooks/usePhotoGalleryWithCache';
 import { formatFileSize } from '@/utils/fileProcessing';
 import { format } from 'date-fns';
 import BatchRenameDialog from './BatchRenameDialog';
@@ -37,7 +37,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
     clearSelection,
     deleteSelectedPhotos,
     aiRenamePhoto,
-  } = usePhotoGallery();
+  } = usePhotoGalleryWithCache();
 
   const selectedPhotosList = photos.filter(photo => selectedPhotos.has(photo.id));
   const isAllSelected = photos.length > 0 && selectedPhotos.size === photos.length;

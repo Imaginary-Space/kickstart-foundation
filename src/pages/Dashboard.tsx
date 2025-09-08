@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { LogOut, User, Shield } from "lucide-react";
 import { FileDropZone as PhotoFileDropZone } from "@/components/PhotoRenamer/FileDropZone";
 import { usePhotoRenamer } from "@/hooks/usePhotoRenamer";
-import { usePhotoGallery } from "@/hooks/usePhotoGallery";
+import { usePhotoGalleryWithCache } from "@/hooks/usePhotoGalleryWithCache";
 import { useFileGallery } from "@/hooks/useFileGallery";
 import { useUserRole } from "@/hooks/useUserRole";
 import PhotoGallery from "@/components/PhotoGallery";
@@ -18,7 +18,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { isAdmin, roles, loading: roleLoading } = useUserRole();
   
-  const { uploadPhoto, loading: photoLoading } = usePhotoGallery();
+  const { uploadPhoto, loading: photoLoading } = usePhotoGalleryWithCache();
   const { uploadFile, loading: fileLoading } = useFileGallery();
 
   const handlePhotoFiles = async (files: File[]) => {

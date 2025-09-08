@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { photoCacheManager } from '@/utils/photoCache';
 
 interface AuthContextType {
   user: User | null;
@@ -123,6 +124,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
+      // Clear cached data before signing out
+      if (user) {
+        photoCacheManager.clearCache(user.id);
+      }
+      
       const { error } = await supabase.auth.signOut();
       if (error) {
         toast({
