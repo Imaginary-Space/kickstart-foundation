@@ -79,7 +79,11 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => row.toggleExpanded()}
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log('Expand button clicked for row:', row.id);
+            row.toggleExpanded();
+          }}
           className="h-8 w-8 p-0 hover:bg-transparent"
         >
           {row.getIsExpanded() ? (
@@ -98,7 +102,10 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          onCheckedChange={(value) => {
+            console.log('Select all checkbox clicked:', value);
+            table.toggleAllPageRowsSelected(!!value);
+          }}
           aria-label="Select all"
           className="glass border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
         />
@@ -106,7 +113,10 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onCheckedChange={(value) => {
+            console.log('Row checkbox clicked:', row.id, value);
+            row.toggleSelected(!!value);
+          }}
           aria-label="Select row"
           className="glass border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
         />
@@ -222,7 +232,11 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => aiRenamePhoto(photo.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('AI Rename button clicked for photo:', photo.id);
+                aiRenamePhoto(photo.id);
+              }}
               disabled={loading}
               className="h-8 w-8 p-0 hover:bg-primary/10"
               title="AI Rename"
@@ -232,7 +246,11 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => downloadPhoto(photo)}
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('Download button clicked for photo:', photo.id);
+                downloadPhoto(photo);
+              }}
               className="h-8 w-8 p-0 hover:bg-primary/10"
               title="Download"
             >
@@ -241,7 +259,11 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => handleDeletePhoto(photo)}
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('Delete button clicked for photo:', photo.id);
+                handleDeletePhoto(photo);
+              }}
               className="h-8 w-8 p-0 hover:bg-destructive/10"
               title="Delete"
             >
@@ -390,25 +412,40 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className }) => {
   });
 
   const handleDeletePhoto = async (photo: PhotoMetadata) => {
-    if (window.confirm(`Are you sure you want to delete "${photo.original_name}"?`)) {
-      await deletePhoto(photo.id, photo.file_path);
+    console.log('handleDeletePhoto called:', photo.id);
+    try {
+      if (window.confirm(`Are you sure you want to delete "${photo.original_name}"?`)) {
+        await deletePhoto(photo.id, photo.file_path);
+      }
+    } catch (error) {
+      console.error('Error in handleDeletePhoto:', error);
     }
   };
 
   const downloadPhoto = (photo: PhotoMetadata) => {
-    if (photo.url) {
-      const link = document.createElement('a');
-      link.href = photo.url;
-      link.download = photo.original_name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    console.log('downloadPhoto called:', photo.id);
+    try {
+      if (photo.url) {
+        const link = document.createElement('a');
+        link.href = photo.url;
+        link.download = photo.original_name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Error in downloadPhoto:', error);
     }
   };
 
   const handleDeleteSelected = async () => {
-    if (window.confirm(`Are you sure you want to delete ${selectedPhotos.size} selected photos?`)) {
-      await deleteSelectedPhotos();
+    console.log('handleDeleteSelected called, selected count:', selectedPhotos.size);
+    try {
+      if (window.confirm(`Are you sure you want to delete ${selectedPhotos.size} selected photos?`)) {
+        await deleteSelectedPhotos();
+      }
+    } catch (error) {
+      console.error('Error in handleDeleteSelected:', error);
     }
   };
 
