@@ -21,17 +21,18 @@ import { usePhotoGalleryWithCache } from "@/hooks/usePhotoGalleryWithCache";
 import { useFileGallery } from "@/hooks/useFileGallery";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useToast } from "@/hooks/use-toast";
 import PhotoGallery from "@/components/PhotoGallery";
 import FileGallery from "@/components/FileGallery";
 import FileDropZone from "@/components/FileDropZone";
+import UpgradePricingModal from "@/components/UpgradePricingModal";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { isAdmin, roles, loading: roleLoading } = useUserRole();
   const { subscribed, subscription_tier, subscription_end, loading: subscriptionLoading, openCustomerPortal } = useSubscription();
-  const { toast } = useToast();
+  
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
   const { uploadPhoto, loading: photoLoading } = usePhotoGalleryWithCache();
   const { uploadFile, loading: fileLoading } = useFileGallery();
@@ -39,11 +40,7 @@ const Dashboard = () => {
   const handlePhotoFiles = async (files: File[]) => {
     // Check subscription status and apply limits for free users
     if (!subscribed && files.length > 2) {
-      toast({
-        title: "Upload Limit Reached",
-        description: "Free users can only upload 2 photos at a time. Upgrade to a paid plan for unlimited uploads.",
-        variant: "destructive",
-      });
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -258,6 +255,11 @@ const Dashboard = () => {
           </section>
         </main>
       </div>
+      
+      <UpgradePricingModal 
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </div>
   );
 };
