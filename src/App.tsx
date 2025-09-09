@@ -16,6 +16,7 @@ const TestimonialsPage = lazy(() => import("./pages/Testimonials"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Styleguide = lazy(() => import("./pages/Styleguide"));
 const NameGenerator = lazy(() => import("./pages/NameGenerator"));
+const Docs = lazy(() => import("./pages/Docs"));
 const AdminPanel = lazy(() => import("./components/AdminPanel"));
 const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
 
@@ -62,6 +63,7 @@ const App = () => (
                   </Suspense>
                 } />
                 <Route path="/styleguide" element={<Styleguide />} />
+                <Route path="/docs" element={<Docs />} />
                 <Route path="/admin" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <ProtectedRoute>

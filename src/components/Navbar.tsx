@@ -29,6 +29,9 @@ export const Navbar = () => {
             <Link to="/testimonials" className="text-muted-foreground hover:text-foreground transition-colors">
               Testimonials
             </Link>
+            <Link to="/docs" className="text-muted-foreground hover:text-foreground transition-colors">
+              Docs
+            </Link>
             <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
               Pricing
             </a>
