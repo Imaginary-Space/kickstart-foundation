@@ -25,7 +25,35 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
     };
 
-    checkOnboardingStatus();
+    let channel: any = null;
+
+    if (user) {
+      checkOnboardingStatus();
+
+      // Set up real-time subscription for profile changes
+      channel = supabase
+        .channel(`profile_changes_${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Profile updated:', payload);
+            setOnboardingCompleted(payload.new.onboarding_completed || false);
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, [user]);
 
   if (loading || (user && onboardingCompleted === null)) {
