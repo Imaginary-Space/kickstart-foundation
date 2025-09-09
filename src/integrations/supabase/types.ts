@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      docs: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          description: string | null
+          example: Json | null
+          id: string
+          keywords: string[] | null
+          published: boolean
+          related_links: Json | null
+          sections: Json | null
+          sort_order: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          description?: string | null
+          example?: Json | null
+          id: string
+          keywords?: string[] | null
+          published?: boolean
+          related_links?: Json | null
+          sections?: Json | null
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          description?: string | null
+          example?: Json | null
+          id?: string
+          keywords?: string[] | null
+          published?: boolean
+          related_links?: Json | null
+          sections?: Json | null
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       emails: {
         Row: {
           body: string
