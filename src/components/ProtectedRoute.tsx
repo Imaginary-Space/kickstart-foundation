@@ -41,10 +41,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Onboarding disabled - skip onboarding check
-  // if (user && onboardingCompleted === false && location.pathname !== '/onboarding') {
-  //   return <Navigate to="/onboarding" replace />;
-  // }
+  // Redirect to onboarding if not completed
+  if (user && onboardingCompleted === false && location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />;
+  }
 
   return <>{children}</>;
 };

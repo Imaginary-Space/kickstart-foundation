@@ -11,7 +11,7 @@ import { lazy, Suspense } from "react";
 const Index = lazy(() => import("./pages/Index"));
 const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const Docs = lazy(() => import("./pages/Docs"));
@@ -45,6 +45,13 @@ const App = () => (
                   <Suspense fallback={<PageSkeleton />}>
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  </Suspense>
+                } />
+                <Route path="/onboarding" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <ProtectedRoute>
+                      <Onboarding />
                     </ProtectedRoute>
                   </Suspense>
                 } />
