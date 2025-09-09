@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      cancelled_subscriptions: {
+        Row: {
+          cancellation_reason: string | null
+          cancelled_at: string
+          created_at: string
+          email: string
+          follow_up_sent: boolean
+          id: string
+          notes: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string
+          subscription_tier: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cancellation_reason?: string | null
+          cancelled_at: string
+          created_at?: string
+          email: string
+          follow_up_sent?: boolean
+          id?: string
+          notes?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id: string
+          subscription_tier?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string
+          created_at?: string
+          email?: string
+          follow_up_sent?: boolean
+          id?: string
+          notes?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string
+          subscription_tier?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       docs: {
         Row: {
           category: string
