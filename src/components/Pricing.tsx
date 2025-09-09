@@ -27,8 +27,8 @@ const pricingPlans = [
   },
   {
     name: "Personal", 
-    price: "$7.99",
-    originalPrice: "$15.99",
+    price: "$20.00",
+    originalPrice: "$39.99",
     duration: "month",
     description: "For photo enthusiasts and families",
     features: [
@@ -41,7 +41,7 @@ const pricingPlans = [
     cta: "Start Personal Plan",
     popular: true,
     badge: "Most Popular",
-    priceId: "price_REPLACE_WITH_YOUR_STRIPE_PRICE_ID", // Get this from your Stripe dashboard
+    priceId: "price_1S5UsOJKd2YHMXMFi7BE1hZU",
   },
   {
     name: "Pro",
