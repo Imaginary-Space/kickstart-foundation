@@ -2,19 +2,16 @@ import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { DocsLayout } from "@/components/docs/DocsLayout";
 import { DocsNavigation } from "@/components/docs/DocsNavigation";
-import { DocsSearch } from "@/components/docs/DocsSearch";
+import { AIDocsSearch } from "@/components/docs/AIDocsSearch";
 import { DocSection } from "@/components/docs/DocSection";
 import { FeaturedArticles } from "@/components/docs/FeaturedArticles";
 import { UserGuides } from "@/components/docs/UserGuides";
 import { useDocs, type DocSection as DocSectionType } from "@/hooks/useDocs";
-import { BookOpen, Loader2, AlertCircle, Search } from "lucide-react";
+import { BookOpen, Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 
 export default function Docs() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [showSearch, setShowSearch] = useState(false);
   const { docsContent, loading, error } = useDocs();
 
   if (loading) {
@@ -49,27 +46,18 @@ export default function Docs() {
     );
   }
 
-  // Filter sections based on search query
-  const filteredSections = docsContent.filter(section =>
-    section.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    section.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    section.keywords.some(keyword => 
-      keyword.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  // Filter sections based on search query (keeping for backwards compatibility)
+  const filteredSections = docsContent;
 
   const currentSection = activeSection ? docsContent.find(section => section.id === activeSection) : null;
   const isHomepage = !activeSection;
 
   const handleSectionClick = (sectionId: string) => {
     setActiveSection(sectionId);
-    setShowSearch(false);
   };
 
   const handleBackToHome = () => {
     setActiveSection(null);
-    setSearchQuery("");
-    setShowSearch(false);
   };
 
   return (
@@ -100,29 +88,6 @@ export default function Docs() {
                 </div>
               </div>
             </div>
-            
-            <div className="flex items-center gap-3">
-              {!showSearch && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowSearch(true)}
-                  className="gap-2"
-                >
-                  <Search className="h-4 w-4" />
-                  Search docs
-                </Button>
-              )}
-              {showSearch && (
-                <div className="w-80">
-                  <DocsSearch 
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    resultsCount={filteredSections.length}
-                  />
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </header>
@@ -139,54 +104,22 @@ export default function Docs() {
                 Everything you need to master our AI-powered photo management platform. 
                 From getting started to advanced features.
               </p>
+              
+              {/* AI-Powered Search */}
+              <div className="pt-8">
+                <AIDocsSearch onSelectDoc={handleSectionClick} />
+              </div>
             </div>
 
-            {searchQuery ? (
-              // Search Results
-              <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-foreground">
-                  Search Results ({filteredSections.length})
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredSections.map((section) => (
-                    <div
-                      key={section.id}
-                      className="glass-card p-6 cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1"
-                      onClick={() => handleSectionClick(section.id)}
-                    >
-                      <h4 className="font-semibold text-foreground mb-2">
-                        {section.title}
-                      </h4>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                        {section.description}
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {section.keywords.slice(0, 2).map((keyword) => (
-                          <span
-                            key={keyword}
-                            className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full"
-                          >
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              // Homepage Content
-              <>
-                <FeaturedArticles 
-                  sections={docsContent} 
-                  onSectionClick={handleSectionClick}
-                />
-                <UserGuides 
-                  sections={docsContent} 
-                  onSectionClick={handleSectionClick}
-                />
-              </>
-            )}
+            {/* Homepage Content */}
+            <FeaturedArticles 
+              sections={docsContent} 
+              onSectionClick={handleSectionClick}
+            />
+            <UserGuides 
+              sections={docsContent} 
+              onSectionClick={handleSectionClick}
+            />
           </div>
         ) : (
           // Individual Document View
@@ -203,7 +136,7 @@ export default function Docs() {
               {currentSection && (
                 <DocSection 
                   section={currentSection}
-                  searchQuery={searchQuery}
+                  searchQuery=""
                 />
               )}
             </main>
