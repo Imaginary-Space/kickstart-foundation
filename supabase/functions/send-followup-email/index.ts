@@ -121,7 +121,7 @@ const serve_handler = async (req: Request): Promise<Response> => {
 
     // Send email via Resend
     const emailResponse = await resend.emails.send({
-      from: "Photo Rename Team <noreply@photorenameapp.com>",
+      from: "A Class With Harry <noreply@aclasswithharry.com>",
       to: [email],
       subject: "We'd love your feedback - Special offer inside! 🎁",
       html: emailHtml,
