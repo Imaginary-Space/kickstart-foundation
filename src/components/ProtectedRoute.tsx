@@ -72,8 +72,13 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Redirect to onboarding if not completed
+  // Redirect to onboarding if not completed (but don't redirect if coming from onboarding completion)
   if (user && onboardingCompleted === false && location.pathname !== '/onboarding') {
+    // Allow navigation to dashboard if we're coming from onboarding (completion flow)
+    const fromOnboarding = location.state?.from?.pathname === '/onboarding';
+    if (location.pathname === '/dashboard' && fromOnboarding) {
+      return <>{children}</>;
+    }
     return <Navigate to="/onboarding" replace />;
   }
 

@@ -54,7 +54,7 @@ export default function Onboarding() {
     try {
       await saveOnboardingData(formData);
       await completeOnboarding();
-      navigate("/dashboard");
+      navigate("/dashboard", { state: { from: { pathname: '/onboarding' } } });
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
       setIsCompleting(false);
