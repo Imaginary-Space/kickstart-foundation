@@ -70,26 +70,19 @@ serve(async (req) => {
       // Get customer details from Stripe
       const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
       
+      let customerEmail = null;
+      
       // Handle deleted customers or customers without email
-      if (customer.deleted || !customer.email) {
-        logStep("Customer deleted or no email found, skipping cancellation record", { 
-          customerId, 
-          deleted: customer.deleted,
-          hasEmail: !!customer.email 
-        });
-        
-        // Still acknowledge the webhook even if we can't process it
-        return new Response(JSON.stringify({ 
-          received: true, 
-          processed: "subscription_cancelled_no_email",
-          customerId 
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
+      if (customer.deleted) {
+        logStep("Customer was deleted, using placeholder email", { customerId });
+        customerEmail = `deleted-customer-${customerId}@stripe.deleted`;
+      } else if (!customer.email) {
+        logStep("No email found for customer, using placeholder", { customerId });
+        customerEmail = `no-email-${customerId}@stripe.unknown`;
+      } else {
+        customerEmail = customer.email;
+        logStep("Found customer email", { email: customerEmail });
       }
-
-      logStep("Found customer email", { email: customer.email });
 
       // Determine subscription tier based on price
       let subscriptionTier = "Unknown";
@@ -113,8 +106,8 @@ serve(async (req) => {
       const { data: subscriberData } = await supabaseClient
         .from("subscribers")
         .select("user_id")
-        .eq("email", customer.email)
-        .single();
+        .eq("email", customerEmail)
+        .maybeSingle();
 
       const userId = subscriberData?.user_id || null;
       logStep("Found user_id", { userId });
@@ -124,7 +117,7 @@ serve(async (req) => {
         .from("cancelled_subscriptions")
         .insert({
           user_id: userId,
-          email: customer.email,
+          email: customerEmail,
           stripe_customer_id: customerId,
           stripe_subscription_id: subscription.id,
           subscription_tier: subscriptionTier,
@@ -148,7 +141,7 @@ serve(async (req) => {
           subscription_end: null,
           updated_at: new Date().toISOString(),
         })
-        .eq("email", customer.email);
+        .eq("email", customerEmail);
 
       if (updateError) {
         logStep("Error updating subscriber record", { error: updateError });
@@ -160,7 +153,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ 
         received: true, 
         processed: "subscription_cancelled",
-        email: customer.email 
+        email: customerEmail 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
