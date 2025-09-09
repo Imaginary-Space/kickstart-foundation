@@ -3,7 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User, Shield } from "lucide-react";
+import { LogOut, User, Shield, Settings } from "lucide-react";
+import { useState } from "react";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { FileDropZone as PhotoFileDropZone } from "@/components/PhotoRenamer/FileDropZone";
 import { usePhotoRenamer } from "@/hooks/usePhotoRenamer";
 import { usePhotoGalleryWithCache } from "@/hooks/usePhotoGalleryWithCache";
@@ -84,6 +95,58 @@ const Dashboard = () => {
                   Admin
                 </Button>
               )}
+              
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <DrawerHeader>
+                    <DrawerTitle>User Settings</DrawerTitle>
+                    <DrawerDescription>
+                      Manage your account preferences and settings
+                    </DrawerDescription>
+                  </DrawerHeader>
+                  
+                  <div className="px-4 pb-4 space-y-4">
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Account Information</h4>
+                      <div className="text-sm text-muted-foreground">
+                        <p>Email: {user?.email}</p>
+                        <p>User ID: {user?.id}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Preferences</h4>
+                      <div className="space-y-2">
+                        <Button variant="ghost" size="sm" className="w-full justify-start">
+                          Change Password
+                        </Button>
+                        <Button variant="ghost" size="sm" className="w-full justify-start">
+                          Notification Settings
+                        </Button>
+                        <Button variant="ghost" size="sm" className="w-full justify-start">
+                          Privacy Settings
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <DrawerFooter>
+                    <DrawerClose asChild>
+                      <Button variant="ghost">Close</Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
               
               <Button 
                 variant="ghost" 
