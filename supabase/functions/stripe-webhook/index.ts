@@ -69,9 +69,24 @@ serve(async (req) => {
 
       // Get customer details from Stripe
       const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
-      if (!customer.email) {
-        logStep("No email found for customer", { customerId });
-        return new Response("No customer email found", { status: 400 });
+      
+      // Handle deleted customers or customers without email
+      if (customer.deleted || !customer.email) {
+        logStep("Customer deleted or no email found, skipping cancellation record", { 
+          customerId, 
+          deleted: customer.deleted,
+          hasEmail: !!customer.email 
+        });
+        
+        // Still acknowledge the webhook even if we can't process it
+        return new Response(JSON.stringify({ 
+          received: true, 
+          processed: "subscription_cancelled_no_email",
+          customerId 
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
       }
 
       logStep("Found customer email", { email: customer.email });
