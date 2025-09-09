@@ -6,14 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Users, Activity, UserX, Mail, Calendar, Edit } from 'lucide-react';
+import { Shield, Users, Activity, UserX, Mail, Calendar, Edit, Plus, Send } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 import { ErrorLogsTable } from './ErrorLogsTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import HealthStatusPanel from './HealthStatusPanel';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 type AppRole = Database['public']['Enums']['app_role'];
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -31,6 +33,13 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [followUpNotes, setFollowUpNotes] = useState<string>('');
   const [selectedCancellation, setSelectedCancellation] = useState<CancelledSubscription | null>(null);
+  const [sendingEmails, setSendingEmails] = useState<{ [key: string]: boolean }>({});
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newCancellation, setNewCancellation] = useState({
+    email: '',
+    subscription_tier: 'Personal',
+    cancellation_reason: '',
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -225,6 +234,85 @@ const AdminPanel = () => {
     }
   };
 
+  const sendFollowUpEmail = async (cancellation: CancelledSubscription) => {
+    try {
+      setSendingEmails(prev => ({ ...prev, [cancellation.id]: true }));
+
+      const { data, error } = await supabase.functions.invoke('send-followup-email', {
+        body: {
+          cancellationId: cancellation.id,
+          email: cancellation.email,
+          subscriptionTier: cancellation.subscription_tier || 'Unknown',
+          cancelledAt: cancellation.cancelled_at,
+          cancellationReason: cancellation.cancellation_reason,
+        },
+      });
+
+      if (error) throw error;
+
+      // Update local state
+      setCancelledSubscriptions(prev =>
+        prev.map(sub =>
+          sub.id === cancellation.id ? { ...sub, follow_up_sent: true } : sub
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Follow-up email sent successfully",
+      });
+    } catch (error: any) {
+      console.error('Error sending follow-up email:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send follow-up email",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingEmails(prev => ({ ...prev, [cancellation.id]: false }));
+    }
+  };
+
+  const addTestCancellation = async () => {
+    try {
+      const { error } = await supabase
+        .from('cancelled_subscriptions')
+        .insert({
+          email: newCancellation.email,
+          subscription_tier: newCancellation.subscription_tier,
+          cancellation_reason: newCancellation.cancellation_reason,
+          cancelled_at: new Date().toISOString(),
+          stripe_customer_id: `test-${Date.now()}`,
+          stripe_subscription_id: `sub_test_${Date.now()}`,
+        });
+
+      if (error) throw error;
+
+      // Refresh the data
+      await fetchCancelledSubscriptions();
+      
+      // Reset form
+      setNewCancellation({
+        email: '',
+        subscription_tier: 'Personal',
+        cancellation_reason: '',
+      });
+      setIsAddDialogOpen(false);
+
+      toast({
+        title: "Success",
+        description: "Test cancellation record added successfully",
+      });
+    } catch (error: any) {
+      console.error('Error adding test cancellation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add test cancellation record",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -329,14 +417,77 @@ const AdminPanel = () => {
         
         <TabsContent value="follow-ups" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserX className="w-5 h-5" />
-                Cancelled Subscriptions Follow-up
-              </CardTitle>
-              <CardDescription>
-                Track and follow up with users who cancelled their subscriptions
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <UserX className="w-5 h-5" />
+                  Cancelled Subscriptions Follow-up
+                </CardTitle>
+                <CardDescription>
+                  Track and follow up with users who cancelled their subscriptions
+                </CardDescription>
+              </div>
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Test Record
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Add Test Cancellation Record</DialogTitle>
+                    <DialogDescription>
+                      Add a test cancellation record to test the email follow-up feature.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="your-email@example.com"
+                        value={newCancellation.email}
+                        onChange={(e) => setNewCancellation(prev => ({ ...prev, email: e.target.value }))}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="subscription_tier">Subscription Tier</Label>
+                      <Select 
+                        value={newCancellation.subscription_tier} 
+                        onValueChange={(value) => setNewCancellation(prev => ({ ...prev, subscription_tier: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Personal">Personal</SelectItem>
+                          <SelectItem value="Premium">Premium</SelectItem>
+                          <SelectItem value="Enterprise">Enterprise</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="cancellation_reason">Cancellation Reason</Label>
+                      <Textarea
+                        id="cancellation_reason"
+                        placeholder="Test reason..."
+                        value={newCancellation.cancellation_reason}
+                        onChange={(e) => setNewCancellation(prev => ({ ...prev, cancellation_reason: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={addTestCancellation} disabled={!newCancellation.email}>
+                      Add Record
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
@@ -379,11 +530,30 @@ const AdminPanel = () => {
                           <div className="flex items-center gap-2">
                             {!cancellation.follow_up_sent && (
                               <Button
+                                onClick={() => sendFollowUpEmail(cancellation)}
+                                disabled={sendingEmails[cancellation.id]}
                                 size="sm"
-                                variant="default"
+                                className="bg-blue-600 hover:bg-blue-700"
+                              >
+                                {sendingEmails[cancellation.id] ? (
+                                  <>
+                                    <Send className="h-4 w-4 mr-2 animate-spin" />
+                                    Sending...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Mail className="h-4 w-4 mr-2" />
+                                    Send Email
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                            {!cancellation.follow_up_sent && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
                                 onClick={() => markFollowUpSent(cancellation.id)}
                               >
-                                <Mail className="w-3 h-3 mr-1" />
                                 Mark Sent
                               </Button>
                             )}
