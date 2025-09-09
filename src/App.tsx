@@ -15,7 +15,7 @@ const Onboarding = lazy(() => import("./pages/Onboarding"));
 const TestimonialsPage = lazy(() => import("./pages/Testimonials"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Styleguide = lazy(() => import("./pages/Styleguide"));
-const NameGenerator = lazy(() => import("./pages/NameGenerator"));
+
 const Docs = lazy(() => import("./pages/Docs"));
 const AdminPanel = lazy(() => import("./components/AdminPanel"));
 const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
@@ -72,7 +72,7 @@ const App = () => (
                   </Suspense>
                 } />
                 <Route path="/testimonials" element={<TestimonialsPage />} />
-                <Route path="/name-generator" element={<NameGenerator />} />
+                
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
