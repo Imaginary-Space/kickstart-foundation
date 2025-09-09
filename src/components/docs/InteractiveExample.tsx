@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { type ExampleType } from "@/data/docsContent";
+import { type ExampleType } from "@/hooks/useDocs";
 import { 
   Upload, 
   Bot, 

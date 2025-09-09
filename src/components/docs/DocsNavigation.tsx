@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { type DocSection } from "@/data/docsContent";
+import { type DocSection } from "@/hooks/useDocs";
 import { 
   FileText, 
   Upload, 

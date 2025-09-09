@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { InteractiveExample } from "./InteractiveExample";
-import { type DocSection as DocSectionType } from "@/data/docsContent";
+import { type DocSection as DocSectionType } from "@/hooks/useDocs";
 import { 
   BookOpen, 
   ExternalLink, 
