@@ -20,6 +20,7 @@ import { usePhotoRenamer } from "@/hooks/usePhotoRenamer";
 import { usePhotoGalleryWithCache } from "@/hooks/usePhotoGalleryWithCache";
 import { useFileGallery } from "@/hooks/useFileGallery";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useSubscription } from "@/hooks/useSubscription";
 import PhotoGallery from "@/components/PhotoGallery";
 import FileGallery from "@/components/FileGallery";
 import FileDropZone from "@/components/FileDropZone";
@@ -28,6 +29,7 @@ const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { isAdmin, roles, loading: roleLoading } = useUserRole();
+  const { subscribed, subscription_tier, subscription_end, loading: subscriptionLoading, openCustomerPortal } = useSubscription();
   
   const { uploadPhoto, loading: photoLoading } = usePhotoGalleryWithCache();
   const { uploadFile, loading: fileLoading } = useFileGallery();
@@ -122,6 +124,40 @@ const Dashboard = () => {
                         <p>Email: {user?.email}</p>
                         <p>User ID: {user?.id}</p>
                       </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Subscription Status</h4>
+                      {subscriptionLoading ? (
+                        <p className="text-sm text-muted-foreground">Loading subscription...</p>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="text-sm">
+                            <div className="flex items-center gap-2">
+                              <span>Status:</span>
+                              <Badge variant={subscribed ? "default" : "secondary"}>
+                                {subscribed ? "Active" : "Inactive"}
+                              </Badge>
+                            </div>
+                            {subscription_tier && (
+                              <p className="text-muted-foreground">Plan: {subscription_tier}</p>
+                            )}
+                            {subscription_end && (
+                              <p className="text-muted-foreground">
+                                Expires: {new Date(subscription_end).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full justify-start"
+                            onClick={openCustomerPortal}
+                          >
+                            Manage Subscription
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="space-y-2">
