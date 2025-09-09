@@ -41,7 +41,7 @@ const pricingPlans = [
     cta: "Start Personal Plan",
     popular: true,
     badge: "Most Popular",
-    priceId: "price_1QV1234567890", // Replace with your actual Stripe price ID
+    priceId: "price_REPLACE_WITH_YOUR_STRIPE_PRICE_ID", // Get this from your Stripe dashboard
   },
   {
     name: "Pro",
@@ -60,7 +60,7 @@ const pricingPlans = [
     cta: "Start Pro Plan",
     popular: false,
     badge: "Best Value",
-    priceId: "price_2QV1234567890", // Replace with your actual Stripe price ID
+    priceId: "price_REPLACE_WITH_YOUR_STRIPE_PRICE_ID_2", // Get this from your Stripe dashboard
   }
 ];
 
