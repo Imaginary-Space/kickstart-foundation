@@ -12,9 +12,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
-const TestimonialsPage = lazy(() => import("./pages/Testimonials"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const Styleguide = lazy(() => import("./pages/Styleguide"));
 
 const Docs = lazy(() => import("./pages/Docs"));
 const AdminPanel = lazy(() => import("./components/AdminPanel"));
@@ -62,7 +60,6 @@ const App = () => (
                     <Login />
                   </Suspense>
                 } />
-                <Route path="/styleguide" element={<Styleguide />} />
                 <Route path="/docs" element={<Docs />} />
                 <Route path="/admin" element={
                   <Suspense fallback={<PageSkeleton />}>
@@ -71,7 +68,6 @@ const App = () => (
                     </ProtectedRoute>
                   </Suspense>
                 } />
-                <Route path="/testimonials" element={<TestimonialsPage />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
