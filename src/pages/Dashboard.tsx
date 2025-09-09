@@ -21,6 +21,7 @@ import { usePhotoGalleryWithCache } from "@/hooks/usePhotoGalleryWithCache";
 import { useFileGallery } from "@/hooks/useFileGallery";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useToast } from "@/hooks/use-toast";
 import PhotoGallery from "@/components/PhotoGallery";
 import FileGallery from "@/components/FileGallery";
 import FileDropZone from "@/components/FileDropZone";
@@ -30,11 +31,22 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { isAdmin, roles, loading: roleLoading } = useUserRole();
   const { subscribed, subscription_tier, subscription_end, loading: subscriptionLoading, openCustomerPortal } = useSubscription();
+  const { toast } = useToast();
   
   const { uploadPhoto, loading: photoLoading } = usePhotoGalleryWithCache();
   const { uploadFile, loading: fileLoading } = useFileGallery();
 
   const handlePhotoFiles = async (files: File[]) => {
+    // Check subscription status and apply limits for free users
+    if (!subscribed && files.length > 2) {
+      toast({
+        title: "Upload Limit Reached",
+        description: "Free users can only upload 2 photos at a time. Upgrade to a paid plan for unlimited uploads.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     for (const file of files) {
       if (file.type.startsWith('image/')) {
         await uploadPhoto(file);
@@ -203,8 +215,26 @@ const Dashboard = () => {
           <section>
             <div className="mb-4">
               <h2 className="text-lg font-medium">Upload Photos</h2>
-              <p className="text-sm text-muted-foreground">Drag and drop your photos to get started</p>
+              <p className="text-sm text-muted-foreground">
+                {subscribed 
+                  ? "Drag and drop unlimited photos to get started" 
+                  : "Drag and drop your photos to get started (2 photos max for free users)"
+                }
+              </p>
             </div>
+            
+            {/* Unlimited Upload Badge for Paid Users */}
+            {subscribed && (
+              <div className="mb-4">
+                <Badge 
+                  variant="default" 
+                  className="bg-green-100 text-green-700 hover:bg-green-200 border border-green-200 flex items-center gap-2 w-fit"
+                >
+                  ✨ Unlimited Dropzone Activated
+                </Badge>
+              </div>
+            )}
+            
             <PhotoFileDropZone
               onFiles={handlePhotoFiles}
               isProcessing={photoLoading}
