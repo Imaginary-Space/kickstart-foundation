@@ -16,12 +16,7 @@ const Index = () => {
   // Initialize analytics after page load
   useAnalytics();
 
-  // Redirect logged-in users to dashboard
-  useEffect(() => {
-    if (user && !loading) {
-      navigate('/dashboard');
-    }
-  }, [user, loading, navigate]);
+  // No automatic redirect - let users choose between landing page and dashboard
   
   return (
     <main className="min-h-screen">

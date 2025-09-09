@@ -43,12 +43,6 @@ export const Navbar = () => {
             >
               Docs
             </Link>
-            <Link 
-              to="/testimonials" 
-              className={`transition-colors ${location.pathname === '/testimonials' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              Testimonials
-            </Link>
             {location.pathname === '/' && (
               <a 
                 href="#pricing" 
@@ -68,20 +62,20 @@ export const Navbar = () => {
             {user ? (
               <>
                 <span className="text-sm text-muted-foreground">
-                  Hola, {user.user_metadata?.full_name || user.email}
+                  Hello, {user.user_metadata?.full_name || user.email}
                 </span>
                 <Button variant="ghost" onClick={signOut}>
                   <LogOut className="w-4 h-4 mr-2" />
-                  Cerrar Sesión
+                  Sign Out
                 </Button>
               </>
             ) : (
               <>
                 <Button variant="ghost" asChild>
-                  <Link to="/login">Iniciar Sesión</Link>
+                  <Link to="/login">Sign In</Link>
                 </Button>
                 <Button variant="default" asChild>
-                  <Link to="/login">Prueba Gratis</Link>
+                  <Link to="/login">Try Free</Link>
                 </Button>
               </>
             )}
@@ -124,13 +118,6 @@ export const Navbar = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Docs
-              </Link>
-              <Link 
-                to="/testimonials" 
-                className={`block transition-colors ${location.pathname === '/testimonials' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Testimonials
               </Link>
               {location.pathname === '/' && (
                 <a 
