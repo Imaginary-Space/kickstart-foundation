@@ -42,11 +42,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
             filter: `id=eq.${user.id}`
           },
           (payload) => {
-            console.log('Profile updated:', payload);
+            console.log('Profile updated via real-time:', payload);
+            console.log('New onboarding_completed value:', payload.new.onboarding_completed);
             setOnboardingCompleted(payload.new.onboarding_completed || false);
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Real-time subscription status:', status);
+        });
     }
 
     return () => {
