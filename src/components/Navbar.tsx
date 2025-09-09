@@ -1,10 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Menu, LogOut } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ImageIcon, Menu, LogOut, X } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -20,21 +23,44 @@ export const Navbar = () => {
           
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-              Features
-            </a>
-            <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-              How It Works
-            </a>
-            <Link to="/testimonials" className="text-muted-foreground hover:text-foreground transition-colors">
-              Testimonials
+            <Link 
+              to="/" 
+              className={`transition-colors ${location.pathname === '/' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Home
             </Link>
-            <Link to="/docs" className="text-muted-foreground hover:text-foreground transition-colors">
+            {user && (
+              <Link 
+                to="/dashboard" 
+                className={`transition-colors ${location.pathname === '/dashboard' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Dashboard
+              </Link>
+            )}
+            <Link 
+              to="/docs" 
+              className={`transition-colors ${location.pathname === '/docs' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+            >
               Docs
             </Link>
-            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-              Pricing
-            </a>
+            <Link 
+              to="/testimonials" 
+              className={`transition-colors ${location.pathname === '/testimonials' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Testimonials
+            </Link>
+            {location.pathname === '/' && (
+              <a 
+                href="#pricing" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                Pricing
+              </a>
+            )}
           </div>
           
           {/* CTA Button */}
@@ -62,10 +88,93 @@ export const Navbar = () => {
           </div>
           
           {/* Mobile Menu Button */}
-          <Button variant="ghost" size="sm" className="md:hidden">
-            <Menu className="w-5 h-5" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
+        
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-sm">
+            <div className="px-6 py-4 space-y-4">
+              <Link 
+                to="/" 
+                className={`block transition-colors ${location.pathname === '/' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
+              {user && (
+                <Link 
+                  to="/dashboard" 
+                  className={`block transition-colors ${location.pathname === '/dashboard' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
+              <Link 
+                to="/docs" 
+                className={`block transition-colors ${location.pathname === '/docs' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Docs
+              </Link>
+              <Link 
+                to="/testimonials" 
+                className={`block transition-colors ${location.pathname === '/testimonials' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Testimonials
+              </Link>
+              {location.pathname === '/' && (
+                <a 
+                  href="#pricing" 
+                  className="block text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Pricing
+                </a>
+              )}
+              
+              {/* Mobile CTA Buttons */}
+              <div className="pt-4 space-y-2">
+                {user ? (
+                  <Button 
+                    variant="ghost" 
+                    onClick={signOut}
+                    className="w-full justify-start"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="ghost" asChild className="w-full">
+                      <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                        Sign In
+                      </Link>
+                    </Button>
+                    <Button variant="default" asChild className="w-full">
+                      <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                        Try Free
+                      </Link>
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
