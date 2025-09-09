@@ -1,7 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Star, Zap } from "lucide-react";
+import { Check, Star, Zap, CreditCard } from "lucide-react";
 import { LazyImage } from "@/components/LazyImage";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const pricingPlans = [
   {
@@ -18,7 +22,8 @@ const pricingPlans = [
     ],
     cta: "Start Free Trial",
     popular: false,
-    badge: null
+    badge: null,
+    priceId: null, // No Stripe price for free trial
   },
   {
     name: "Personal", 
@@ -35,7 +40,8 @@ const pricingPlans = [
     ],
     cta: "Start Personal Plan",
     popular: true,
-    badge: "Most Popular"
+    badge: "Most Popular",
+    priceId: "price_1QV1234567890", // Replace with your actual Stripe price ID
   },
   {
     name: "Pro",
@@ -53,11 +59,79 @@ const pricingPlans = [
     ],
     cta: "Start Pro Plan",
     popular: false,
-    badge: "Best Value"
+    badge: "Best Value",
+    priceId: "price_2QV1234567890", // Replace with your actual Stripe price ID
   }
 ];
 
 export const Pricing = () => {
+  const { user } = useAuth();
+  const { subscribed, subscription_tier, createCheckout, openCustomerPortal } = useSubscription();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handlePlanAction = async (plan: typeof pricingPlans[0]) => {
+    // If user is already subscribed to this plan, open customer portal
+    if (subscribed && subscription_tier === plan.name) {
+      try {
+        setLoading(plan.name);
+        await openCustomerPortal();
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to open customer portal. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(null);
+      }
+      return;
+    }
+
+    // For free trial, redirect to signup/dashboard
+    if (plan.name === "Free Trial") {
+      if (user) {
+        window.location.href = '/dashboard';
+      } else {
+        window.location.href = '/login';
+      }
+      return;
+    }
+
+    // For paid plans, create checkout
+    if (!user) {
+      toast({
+        title: "Sign up required",
+        description: "Please sign up or log in to subscribe to a paid plan.",
+        variant: "destructive",
+      });
+      window.location.href = '/login';
+      return;
+    }
+
+    if (!plan.priceId) {
+      toast({
+        title: "Configuration Error",
+        description: "Stripe price ID not configured for this plan.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(plan.name);
+      await createCheckout(plan.priceId, plan.name);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create checkout session. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
     <section id="pricing" className="py-24 bg-gradient-subtle">
       <div className="container mx-auto px-6">
@@ -142,8 +216,22 @@ export const Pricing = () => {
                   variant={plan.popular ? "default" : "ghost"} 
                   className="w-full"
                   size="lg"
+                  onClick={() => handlePlanAction(plan)}
+                  disabled={loading === plan.name}
                 >
-                  {plan.cta}
+                  {loading === plan.name ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      Processing...
+                    </div>
+                  ) : subscribed && subscription_tier === plan.name ? (
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" />
+                      Manage Subscription
+                    </div>
+                  ) : (
+                    plan.cta
+                  )}
                 </Button>
               </CardContent>
             </Card>

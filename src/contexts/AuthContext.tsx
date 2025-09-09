@@ -37,6 +37,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Check subscription status when user logs in
+        if (session?.user && event === 'SIGNED_IN') {
+          setTimeout(() => {
+            supabase.functions.invoke('check-subscription', {
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+              },
+            }).catch(console.error);
+          }, 1000);
+        }
       }
     );
 
@@ -45,6 +56,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Check subscription for existing session
+      if (session?.user) {
+        setTimeout(() => {
+          supabase.functions.invoke('check-subscription', {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }).catch(console.error);
+        }, 1000);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -67,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         toast({
-          title: "Error al registrarse",
+          title: "Sign up error",
           description: error.message,
           variant: "destructive",
         });
@@ -75,14 +97,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       toast({
-        title: "¡Registro exitoso!",
-        description: "Revisa tu email para confirmar tu cuenta.",
+        title: "Sign up successful!",
+        description: "Please check your email to confirm your account.",
       });
 
       return { error: null };
     } catch (error: any) {
       toast({
-        title: "Error al registrarse",
+        title: "Sign up error",
         description: error.message,
         variant: "destructive",
       });
@@ -99,7 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         toast({
-          title: "Error al iniciar sesión",
+          title: "Sign in error",
           description: error.message,
           variant: "destructive",
         });
@@ -107,14 +129,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       toast({
-        title: "¡Bienvenido de vuelta!",
-        description: "Has iniciado sesión correctamente.",
+        title: "Welcome back!",
+        description: "You have successfully signed in.",
       });
 
       return { error: null };
     } catch (error: any) {
       toast({
-        title: "Error al iniciar sesión",
+        title: "Sign in error",
         description: error.message,
         variant: "destructive",
       });
@@ -132,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signOut();
       if (error) {
         toast({
-          title: "Error al cerrar sesión",
+          title: "Sign out error",
           description: error.message,
           variant: "destructive",
         });
@@ -140,12 +162,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente.",
+        title: "Signed out",
+        description: "You have successfully signed out.",
       });
     } catch (error: any) {
       toast({
-        title: "Error al cerrar sesión",
+        title: "Sign out error",
         description: error.message,
         variant: "destructive",
       });
@@ -163,7 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         toast({
-          title: "Error al iniciar sesión",
+          title: "Sign in error",
           description: error.message,
           variant: "destructive",
         });
@@ -173,7 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { error: null };
     } catch (error: any) {
       toast({
-        title: "Error al iniciar sesión",
+        title: "Sign in error",
         description: error.message,
         variant: "destructive",
       });
